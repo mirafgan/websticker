@@ -4,20 +4,32 @@ import {Button} from "@/components/ui/button";
 import {Card, CardContent, CardHeader, CardTitle, CardDescription} from "@/components/ui/card";
 import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
-import {Checkbox} from "@/components/ui/checkbox";
-import {useState} from "react";
+import {type FormEvent, useState} from "react";
 import {Eye, EyeOff, Loader2, Store} from "lucide-react";
 import {useRouter} from "next/navigation";
-import {signIn} from "@/lib/auth-client";
+import {api} from "@/trpc/react";
+import {setCookie} from "@/actions/cookie-action";
 
 export default function SignIn() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false)
     const [rememberMe, setRememberMe] = useState(false);
     const router = useRouter();
-    const handleLogin = async () => {
+    const loginMutation = api.auth.login.useMutation();
+    const {data, isPending: loading, isSuccess} = loginMutation
+    const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        try {
+            loginMutation.mutate({email, password})
+
+        } catch (e) {
+            console.log(e)
+        }
+    };
+    if (isSuccess && !loading) {
+        data?.token && setCookie("Authorization", data?.token ?? '')
+        router.refresh();
     }
     return (
         <Card className="w-full max-w-md">

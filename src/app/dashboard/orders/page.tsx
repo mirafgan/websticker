@@ -9,16 +9,20 @@ import {Plus, Search} from "lucide-react"
 import {ordersApi} from "@/lib/api/orders"
 import type {Order} from "@/lib/types"
 import OrderTable from "@/components/order-table";
+import {api} from "@/trpc/react";
 
 export default function OrdersPage() {
     const [orders, setOrders] = useState<Order[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [searchTerm, setSearchTerm] = useState("")
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+    const {data} = api.auth.getUser.useQuery();
+    const orderMutation = api.order.create.useMutation();
 
     useEffect(() => {
         loadOrders()
     }, [])
+
 
     const loadOrders = async () => {
         try {
@@ -34,9 +38,9 @@ export default function OrdersPage() {
 
     const handleCreateOrder = async (orderData: any) => {
         try {
-            const newOrder = await ordersApi.create(orderData)
-            setOrders([newOrder, ...orders])
-            setIsCreateModalOpen(false)
+            const newOrder = orderMutation.mutate(orderData);
+            // setOrders([newOrder, ...orders])
+            // setIsCreateModalOpen(false)
         } catch (error) {
             console.error("Failed to create order:", error)
         }
