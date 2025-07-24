@@ -72,36 +72,48 @@ model Verification {
 }
 
 model Customer {
-  id             Int      @id @default(autoincrement())
+  id             Int       @id @default(autoincrement())
   name           String
   surname        String
-  email          String   @unique
+  email          String    @unique
   company        String?
-  contact        String   @unique
-  cargoAddress   String   @map("cargo_address")
-  billingAddress String   @map("billing_address")
-  ico            Int?     @unique
-  dico           String?  @unique
-  Orders         Orders[]
+  country        String
+  contact        String    @unique
+  cargoAddress   String    @map("cargo_address")
+  billingAddress String    @map("billing_address")
+  ico            Int?      @unique
+  dico           String?   @unique
+  Orders         Order[]
+  deletedAt      DateTime? @map("deleted_at")
 
   @@map("customer")
 }
 
-model Orders {
+model Order {
   id         Int         @id @default(autoincrement())
-  name       String
-  quantity   Int
-  size       String
-  price      Int
-  material   String
+  total      Int
   notes      String
-  customerId Int         @default(0)
+  customerId Int         @default(0) @map("customer_id")
   contact    Customer    @relation(fields: [customerId], references: [id], onDelete: SetDefault)
-  statusId   Int         @default(1)
+  statusId   Int         @default(1) @map("status_id")
   status     OrderStatus @relation(fields: [statusId], references: [id], onDelete: SetDefault)
-  createdAt  DateTime    @default(now()) @map("date")
+  createdAt  DateTime    @default(now()) @map("created_at")
+  deletedAt  DateTime?   @map("deleted_at")
+  products   Product[]
 
-  @@map("orders")
+  @@map("order")
+}
+
+model Product {
+  id       Int    @id @default(autoincrement())
+  name     String
+  price    Int
+  material String
+  size     String
+  Order    Order? @relation(fields: [orderId], references: [id])
+  orderId  Int?   @map("order_id")
+
+  @@map("product")
 }
 
 enum Status {
@@ -113,9 +125,9 @@ enum Status {
 }
 
 model OrderStatus {
-  id     Int      @id @default(autoincrement())
-  name   Status   @default(DRAFT)
-  Orders Orders[]
+  id    Int     @id @default(autoincrement())
+  name  Status  @default(DRAFT)
+  Order Order[]
 
   @@map("order_status")
 }
