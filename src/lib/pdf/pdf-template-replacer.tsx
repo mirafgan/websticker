@@ -1,5 +1,6 @@
 import {PDFDocument, rgb, StandardFonts} from "pdf-lib"
 import {QRGenerator} from "../qr/qr-generator"
+import type {Product} from "@/lib/types";
 
 export interface TemplateReplacements {
     [key: string]: string | number
@@ -153,37 +154,59 @@ export class PDFTemplateReplacer {
             font: boldFont,
         })
 
-        page.drawText(`Customer: ${order.customer}`, {
+        page.drawText(`Customer: ${order.contact.name} ${order.contact.surname}`, {
             x: 50,
             y: height - 150,
             size: 12,
             font: font,
         })
 
-        page.drawText(`Email: ${order.email}`, {
+        page.drawText(`Email: ${order.contact.email}`, {
             x: 50,
             y: height - 170,
             size: 12,
             font: font,
         })
 
-        page.drawText(`Date: ${order.date}`, {
+        page.drawText(`Date: ${new Date(order.createdAt).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+        })}`, {
             x: 50,
             y: height - 190,
             size: 12,
             font: font,
         })
 
-        page.drawText(`Status: ${order.status}`, {
+        page.drawText(`Status: ${order.status.name}`, {
             x: 50,
             y: height - 210,
             size: 12,
             font: font,
+        });
+
+        page.drawText(`Products: `, {
+            x: 50,
+            y: height - 230,
+            size: 12,
+            font: font,
+        });
+
+
+        order.products.map((item: Product, index: number) => {
+            page.drawText(`${index + 1}. ${item.name} (${item.quantity}) x $${item.price.toFixed(2)}\n `, {
+                x: 70,
+                y: (height - 230) - ((index + 1) * 20),
+                size: 12,
+                font: font,
+            })
         })
+
 
         page.drawText(`Total: $${order.total.toFixed(2)}`, {
             x: 50,
-            y: height - 250,
+            y: height - 270 - order.products.length * 20,
             size: 16,
             font: boldFont,
             color: rgb(0.2, 0.6, 0.2),

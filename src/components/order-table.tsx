@@ -5,6 +5,9 @@ import {Badge} from "@/components/ui/badge"
 import type {Order, Status} from "@/lib/types"
 import {usePDFGenerator} from "@/hooks/use-pdf-generator"
 import {countries} from "@/lib/countries"
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
+import {Button} from "@/components/ui/button";
+import {ChevronDown, FileText} from "lucide-react";
 
 interface IOrderTable {
     orders: Order[]
@@ -140,60 +143,60 @@ export default function OrderTable({orders, statuses, statusOnSubmit}: IOrderTab
                                         <span className="text-xs text-muted-foreground italic">No notes</span>
                                     )}
                                 </TableCell>
-                                {/*<TableCell>*/}
-                                {/*    <div className="flex items-center gap-2">*/}
-                                {/*        <DropdownMenu>*/}
-                                {/*            <DropdownMenuTrigger asChild>*/}
-                                {/*                <Button*/}
-                                {/*                    variant="outline"*/}
-                                {/*                    size="sm"*/}
-                                {/*                    className="h-8 px-2 text-xs bg-transparent"*/}
-                                {/*                    title="Update Status"*/}
-                                {/*                >*/}
-                                {/*                    Status*/}
-                                {/*                    <ChevronDown className="h-3 w-3 ml-1"/>*/}
-                                {/*                </Button>*/}
-                                {/*            </DropdownMenuTrigger>*/}
-                                {/*            <DropdownMenuContent align="end">*/}
-                                {/*                {statuses.map((status) => (*/}
-                                {/*                    <DropdownMenuItem*/}
-                                {/*                        key={status.name}*/}
-                                {/*                        onClick={() => statusOnSubmit(Number(order.id), Number(status.id))}*/}
-                                {/*                        className="cursor-pointer"*/}
-                                {/*                        disabled={order.status.name.toLowerCase() === status.name.toLowerCase()}*/}
-                                {/*                    >*/}
-                                {/*                        <div className="flex items-center gap-2">*/}
-                                {/*                            <div*/}
-                                {/*                                className={`w-2 h-2 rounded-full ${getStatusColor(status.name)}`}/>*/}
-                                {/*                            {status.name}*/}
-                                {/*                        </div>*/}
-                                {/*                    </DropdownMenuItem>*/}
-                                {/*                ))}*/}
-                                {/*            </DropdownMenuContent>*/}
-                                {/*        </DropdownMenu>*/}
-                                {/*        <Button*/}
-                                {/*            variant="outline"*/}
-                                {/*            size="sm"*/}
-                                {/*            onClick={() => handleGeneratePDF(order)}*/}
-                                {/*            disabled={isGenerating}*/}
-                                {/*            className="h-8 w-8 p-0"*/}
-                                {/*            title="Generate PDF"*/}
-                                {/*        >*/}
-                                {/*            <FileText className="h-4 w-4"/>*/}
-                                {/*        </Button>*/}
-                                {/*        <Button*/}
-                                {/*            variant="outline"*/}
-                                {/*            size="sm"*/}
-                                {/*            className="h-8 w-8 p-0 bg-transparent"*/}
-                                {/*            title="View Details"*/}
-                                {/*            onClick={() => {*/}
-                                {/*                console.log("View order details:", order.id)*/}
-                                {/*            }}*/}
-                                {/*        >*/}
-                                {/*            <Eye className="h-4 w-4"/>*/}
-                                {/*        </Button>*/}
-                                {/*    </div>*/}
-                                {/*</TableCell>*/}
+                                <TableCell>
+                                    <div className="flex items-center gap-2">
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="h-8 px-2 text-xs bg-transparent"
+                                                    title="Update Status"
+                                                >
+                                                    Status
+                                                    <ChevronDown className="h-3 w-3 ml-1"/>
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                {statuses.map((status) => (
+                                                    <DropdownMenuItem
+                                                        key={status.name}
+                                                        onClick={() => statusOnSubmit(Number(order.id), Number(status.id))}
+                                                        className="cursor-pointer"
+                                                        disabled={order.status.name.toLowerCase() === status.name.toLowerCase()}
+                                                    >
+                                                        <div className="flex items-center gap-2">
+                                                            <div
+                                                                className={`w-2 h-2 rounded-full ${getStatusColor(status.name)}`}/>
+                                                            {status.name}
+                                                        </div>
+                                                    </DropdownMenuItem>
+                                                ))}
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => handleGeneratePDF(order)}
+                                            disabled={isGenerating}
+                                            className="h-8 w-8 p-0"
+                                            title="Generate PDF"
+                                        >
+                                            <FileText className="h-4 w-4"/>
+                                        </Button>
+                                        {/*<Button*/}
+                                        {/*    variant="outline"*/}
+                                        {/*    size="sm"*/}
+                                        {/*    className="h-8 w-8 p-0 bg-transparent"*/}
+                                        {/*    title="View Details"*/}
+                                        {/*    onClick={() => {*/}
+                                        {/*        console.log("View order details:", order.id)*/}
+                                        {/*    }}*/}
+                                        {/*>*/}
+                                        {/*    <Eye className="h-4 w-4"/>*/}
+                                        {/*</Button>*/}
+                                    </div>
+                                </TableCell>
                             </TableRow>
                         ))
                     )}

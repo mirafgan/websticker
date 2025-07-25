@@ -13,9 +13,8 @@ export function usePDFGenerator() {
             setIsGenerating(true)
 
             // Parse customer name (assuming format "FirstName LastName")
-            const nameParts = order.contact.name.split(" ")
-            const customerName = nameParts[0] || ""
-            const customerSurname = nameParts.slice(1).join(" ") || ""
+            const customerName = order.contact.name || ""
+            const customerSurname = order.contact.surname || ""
 
             const invoiceData: InvoiceData = {
                 customerName,
@@ -26,11 +25,11 @@ export function usePDFGenerator() {
                 orderTotal: order.total,
                 items: order.products
             }
-
-            const pdfBytes = await PDFGenerator.generateInvoice(invoiceData)
-            const filename = `invoice-${order.id}-${Date.now()}.pdf`
-
-            PDFGenerator.downloadPDF(pdfBytes, filename)
+            console.log(invoiceData)
+            // const pdfBytes = await PDFGenerator.generateInvoice(invoiceData)
+            // const filename = `invoice-${order.id}-${Date.now()}.pdf`
+            //
+            // PDFGenerator.downloadPDF(pdfBytes, filename)
         } catch (error) {
             console.error("Failed to generate PDF:", error)
             throw error
