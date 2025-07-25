@@ -1,7 +1,7 @@
 "use client"
 
 import {useState} from "react"
-import {PDFGenerator, type InvoiceData} from "@/lib/pdf/pdf-generator"
+import {type InvoiceData, PDFGenerator} from "@/lib/pdf/pdf-generator"
 import {PDFTemplateReplacer} from "@/lib/pdf/pdf-template-replacer"
 import type {Order} from "@/lib/types"
 
@@ -13,18 +13,18 @@ export function usePDFGenerator() {
             setIsGenerating(true)
 
             // Parse customer name (assuming format "FirstName LastName")
-            const nameParts = order.customer.split(" ")
+            const nameParts = order.contact.name.split(" ")
             const customerName = nameParts[0] || ""
             const customerSurname = nameParts.slice(1).join(" ") || ""
 
             const invoiceData: InvoiceData = {
                 customerName,
                 customerSurname,
-                customerEmail: order.email,
+                customerEmail: order.contact.email,
                 orderId: order.id,
-                orderDate: order.date,
+                orderDate: new Date(order.createdAt).toLocaleDateString(),
                 orderTotal: order.total,
-                items: order.items,
+                items: order.products
             }
 
             const pdfBytes = await PDFGenerator.generateInvoice(invoiceData)

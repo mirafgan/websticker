@@ -19,12 +19,7 @@ export const orderRouter = createTRPCRouter({
                 try {
                     const {notes, customerId, total} = input;
 
-                    const products = input.products.map(product => ({
-                        name: product.name,
-                        material: product.material,
-                        size: product.size,
-                        price: product.price,
-                    }));
+
                     const order = await
                         ctx.db.order.create({
                             data: {
@@ -33,7 +28,7 @@ export const orderRouter = createTRPCRouter({
                                 statusId: 1,
                                 customerId,
                                 products: {
-                                    create: products
+                                    create: input.products
                                 }
                             }
                         });
@@ -56,6 +51,30 @@ export const orderRouter = createTRPCRouter({
             } catch (e) {
                 console.log(e)
                 return ({message: "Not Found", status: 404, order: null})
+            }
+        }),
+    getAllOrdersStatus: publicProcedure.query(async ({ctx}) => {
+        try {
+            const statuses = await ctx.db.orderStatus.findMany({where: {deletedAt: null}});
+            return ({message: "Statuses found", data: statuses})
+        } catch (e) {
+            console.log(e)
+            return ({message: "Not Found", status: 404, data: []})
+        }
+    }),
+    updateOrderStatus: publicProcedure
+        .input(z.object({
+            id: z.number(),
+            statusId: z.number()
+        }))
+        .mutation(async ({input, ctx}) => {
+            try {
+                const {id, statusId} = input
+                await ctx.db.order.update({where: {id}, data: {statusId}});
+                return ({message: "Order status updated successfully"})
+            } catch (e) {
+                console.log(e);
+                return ({message: "Something went wrong"})
             }
         }),
     getAllOrders: publicProcedure

@@ -91,7 +91,10 @@ export const authRouter = createTRPCRouter({
         };
         if (!verify) return ({token: null, message: "Unauthenticated", status: 401});
         try {
-            const user = await ctx.db.user.findFirst({where: {id: verify.id}});
+            const user = await ctx.db.user.findFirst({
+                where: {id: verify.id},
+                select: {name: true, email: true, id: true}
+            });
             return ({success: true, user});
         } catch (e) {
             console.log(e);

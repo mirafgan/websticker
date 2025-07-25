@@ -1,5 +1,5 @@
-import { PDFDocument, rgb, StandardFonts } from "pdf-lib"
-import { QRGenerator } from "../qr/qr-generator"
+import {PDFDocument, rgb, StandardFonts} from "pdf-lib"
+import {QRGenerator} from "../qr/qr-generator"
 
 export interface TemplateReplacements {
     [key: string]: string | number
@@ -27,7 +27,7 @@ export class PDFTemplateReplacer {
             const pdfDoc = await PDFDocument.load(templateBytes)
             const pages = pdfDoc.getPages()
             const firstPage = pages[0]
-            const { width, height } = firstPage.getSize()
+            const {width, height} = firstPage?.getSize() || {width: 0, height: 0}
 
             // Embed fonts
             const font = await pdfDoc.embedFont(StandardFonts.Helvetica)
@@ -38,7 +38,7 @@ export class PDFTemplateReplacer {
 
             let qrCodeImage
             try {
-                const qrCodeBuffer = await QRGenerator.generateQRBufferFromDataURL(qrCodeURL, { width: 120, margin: 1 })
+                const qrCodeBuffer = await QRGenerator.generateQRBufferFromDataURL(qrCodeURL, {width: 120, margin: 1})
                 qrCodeImage = await pdfDoc.embedPng(qrCodeBuffer)
             } catch (qrError) {
                 console.warn("QR code generation failed for template:", qrError)
@@ -53,7 +53,7 @@ export class PDFTemplateReplacer {
             // Add QR Code (top right) - only if successfully generated
             if (qrCodeImage) {
                 const qrSize = 80
-                firstPage.drawImage(qrCodeImage, {
+                firstPage?.drawImage(qrCodeImage, {
                     x: width - qrSize - 30,
                     y: height - qrSize - 30,
                     width: qrSize,
@@ -61,7 +61,7 @@ export class PDFTemplateReplacer {
                 })
 
                 // QR Code label
-                firstPage.drawText("Scan to track", {
+                firstPage?.drawText("Scan to track", {
                     x: width - qrSize - 30,
                     y: height - qrSize - 45,
                     size: 8,
@@ -72,15 +72,15 @@ export class PDFTemplateReplacer {
 
             // Add text overlays on the template
             const overlays = [
-                { text: `${firstName} ${lastName}`, x: 100, y: height - 200, size: 14, font: boldFont },
-                { text: order.email, x: 100, y: height - 220, size: 12, font: font },
-                { text: `Order #${order.id}`, x: 100, y: height - 250, size: 12, font: boldFont },
-                { text: order.date, x: 100, y: height - 270, size: 12, font: font },
-                { text: `$${order.total.toFixed(2)}`, x: 400, y: height - 250, size: 14, font: boldFont },
+                {text: `${firstName} ${lastName}`, x: 100, y: height - 200, size: 14, font: boldFont},
+                {text: order.email, x: 100, y: height - 220, size: 12, font: font},
+                {text: `Order #${order.id}`, x: 100, y: height - 250, size: 12, font: boldFont},
+                {text: order.date, x: 100, y: height - 270, size: 12, font: font},
+                {text: `$${order.total.toFixed(2)}`, x: 400, y: height - 250, size: 14, font: boldFont},
             ]
 
-            overlays.forEach(({ text, x, y, size, font: textFont }) => {
-                firstPage.drawText(text, {
+            overlays.forEach(({text, x, y, size, font: textFont}) => {
+                firstPage?.drawText(text, {
                     x,
                     y,
                     size,
@@ -100,7 +100,7 @@ export class PDFTemplateReplacer {
     private static async createNewInvoicePDF(order: any): Promise<Uint8Array> {
         const pdfDoc = await PDFDocument.create()
         const page = pdfDoc.addPage([595, 842])
-        const { width, height } = page.getSize()
+        const {width, height} = page.getSize()
 
         const font = await pdfDoc.embedFont(StandardFonts.Helvetica)
         const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold)
@@ -110,7 +110,7 @@ export class PDFTemplateReplacer {
 
         let qrCodeImage
         try {
-            const qrCodeBuffer = await QRGenerator.generateQRBufferFromDataURL(qrCodeURL, { width: 120, margin: 1 })
+            const qrCodeBuffer = await QRGenerator.generateQRBufferFromDataURL(qrCodeURL, {width: 120, margin: 1})
             qrCodeImage = await pdfDoc.embedPng(qrCodeBuffer)
         } catch (qrError) {
             console.warn("QR code generation failed for fallback PDF:", qrError)

@@ -1,5 +1,5 @@
-import { PDFDocument, rgb, StandardFonts } from "pdf-lib"
-import { QRGenerator } from "../qr/qr-generator"
+import {PDFDocument, rgb, StandardFonts} from "pdf-lib"
+import {QRGenerator} from "../qr/qr-generator"
 
 export interface InvoiceData {
     customerName: string
@@ -12,6 +12,8 @@ export interface InvoiceData {
         name: string
         price: number
         quantity: number
+        material:string
+        size: string
     }>
 }
 
@@ -22,7 +24,7 @@ export class PDFGenerator {
             // Create a new PDF document
             const pdfDoc = await PDFDocument.create()
             const page = pdfDoc.addPage([595, 842]) // A4 size
-            const { width, height } = page.getSize()
+            const {width, height} = page.getSize()
 
             // Embed fonts
             const font = await pdfDoc.embedFont(StandardFonts.Helvetica)
@@ -38,7 +40,7 @@ export class PDFGenerator {
 
             let qrCodeImage
             try {
-                const qrCodeBuffer = await QRGenerator.generateQRBufferFromDataURL(qrCodeURL, { width: 120, margin: 1 })
+                const qrCodeBuffer = await QRGenerator.generateQRBufferFromDataURL(qrCodeURL, {width: 120, margin: 1})
                 qrCodeImage = await pdfDoc.embedPng(qrCodeBuffer)
             } catch (qrError) {
                 console.warn("QR code generation failed, continuing without QR code:", qrError)
@@ -221,8 +223,8 @@ export class PDFGenerator {
 
             // Draw line above total
             page.drawLine({
-                start: { x: 350, y: yPosition + 10 },
-                end: { x: width - 50, y: yPosition + 10 },
+                start: {x: 350, y: yPosition + 10},
+                end: {x: width - 50, y: yPosition + 10},
                 thickness: 1,
                 color: grayColor,
             })
@@ -272,7 +274,7 @@ export class PDFGenerator {
 
     static downloadPDF(pdfBytes: Uint8Array, filename: string) {
         try {
-            const blob = new Blob([pdfBytes], { type: "application/pdf" })
+            const blob = new Blob([pdfBytes], {type: "application/pdf"})
             const url = URL.createObjectURL(blob)
 
             const link = document.createElement("a")

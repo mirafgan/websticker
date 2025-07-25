@@ -42,6 +42,7 @@ export interface Product {
     id: number
     name: string
     price: number
+    quantity: number
     material: string
     size: string
     orderId: number | null

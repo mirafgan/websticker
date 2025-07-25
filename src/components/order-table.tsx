@@ -2,14 +2,14 @@
 
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table"
 import {Badge} from "@/components/ui/badge"
-import type {Order} from "@/lib/types"
-import {Button} from "@/components/ui/button"
-import {Eye, FileText} from "lucide-react"
+import type {Order, Status} from "@/lib/types"
 import {usePDFGenerator} from "@/hooks/use-pdf-generator"
 import {countries} from "@/lib/countries"
 
 interface IOrderTable {
     orders: Order[]
+    statuses: Status[]
+    statusOnSubmit: (id: number, statusId: number) => void
 }
 
 const getStatusColor = (status: string) => {
@@ -50,8 +50,9 @@ const getCountryName = (countryId: string) => {
     return country?.name || countryId
 }
 
-export default function OrderTable({orders}: IOrderTable) {
+export default function OrderTable({orders, statuses, statusOnSubmit}: IOrderTable) {
     const {isGenerating, generateInvoice, generateFromTemplate} = usePDFGenerator()
+
 
     async function handleGeneratePDF(order: Order) {
         try {
@@ -67,6 +68,7 @@ export default function OrderTable({orders}: IOrderTable) {
         }
     }
 
+
     return (
         <div className="rounded-md border">
             <Table>
@@ -75,11 +77,11 @@ export default function OrderTable({orders}: IOrderTable) {
                         <TableHead className="w-[80px]">Order ID</TableHead>
                         <TableHead className="w-[120px]">Date</TableHead>
                         <TableHead className="w-[200px]">Customer</TableHead>
-                        <TableHead className="w-[100px]">Products</TableHead>
+                        <TableHead className="w-[300px]">Products</TableHead>
                         <TableHead className="w-[100px]">Status</TableHead>
                         <TableHead className="w-[120px]">Total</TableHead>
                         <TableHead className="max-w-[200px]">Notes</TableHead>
-                        <TableHead className="w-[100px]">Actions</TableHead>
+                        {/*<TableHead className="w-[100px]">Actions</TableHead>*/}
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -113,10 +115,9 @@ export default function OrderTable({orders}: IOrderTable) {
                                         <div className="font-medium">{order.products?.length || 0} items</div>
                                         {order.products && order.products.length > 0 && (
                                             <div className="text-xs text-muted-foreground mt-1">
-                                                {order.products.slice(0, 2).map((product, index) => (
-                                                    <div key={product.id} className="truncate max-w-[120px]">
-                                                        {product.name}
-                                                        {index === 0 && order.products.length > 1 && "..."}
+                                                {order.products.map((product, index) => (
+                                                    <div key={product.id} className=" max-w-[300px]">
+                                                        {product.name} - {product.quantity}
                                                     </div>
                                                 ))}
                                             </div>
@@ -139,32 +140,60 @@ export default function OrderTable({orders}: IOrderTable) {
                                         <span className="text-xs text-muted-foreground italic">No notes</span>
                                     )}
                                 </TableCell>
-                                <TableCell>
-                                    <div className="flex items-center gap-2">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => handleGeneratePDF(order)}
-                                            disabled={isGenerating}
-                                            className="h-8 w-8 p-0"
-                                            title="Generate PDF"
-                                        >
-                                            <FileText className="h-4 w-4"/>
-                                        </Button>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            className="h-8 w-8 p-0 bg-transparent"
-                                            title="View Details"
-                                            onClick={() => {
-                                                // Add view details functionality here
-                                                console.log("View order details:", order.id)
-                                            }}
-                                        >
-                                            <Eye className="h-4 w-4"/>
-                                        </Button>
-                                    </div>
-                                </TableCell>
+                                {/*<TableCell>*/}
+                                {/*    <div className="flex items-center gap-2">*/}
+                                {/*        <DropdownMenu>*/}
+                                {/*            <DropdownMenuTrigger asChild>*/}
+                                {/*                <Button*/}
+                                {/*                    variant="outline"*/}
+                                {/*                    size="sm"*/}
+                                {/*                    className="h-8 px-2 text-xs bg-transparent"*/}
+                                {/*                    title="Update Status"*/}
+                                {/*                >*/}
+                                {/*                    Status*/}
+                                {/*                    <ChevronDown className="h-3 w-3 ml-1"/>*/}
+                                {/*                </Button>*/}
+                                {/*            </DropdownMenuTrigger>*/}
+                                {/*            <DropdownMenuContent align="end">*/}
+                                {/*                {statuses.map((status) => (*/}
+                                {/*                    <DropdownMenuItem*/}
+                                {/*                        key={status.name}*/}
+                                {/*                        onClick={() => statusOnSubmit(Number(order.id), Number(status.id))}*/}
+                                {/*                        className="cursor-pointer"*/}
+                                {/*                        disabled={order.status.name.toLowerCase() === status.name.toLowerCase()}*/}
+                                {/*                    >*/}
+                                {/*                        <div className="flex items-center gap-2">*/}
+                                {/*                            <div*/}
+                                {/*                                className={`w-2 h-2 rounded-full ${getStatusColor(status.name)}`}/>*/}
+                                {/*                            {status.name}*/}
+                                {/*                        </div>*/}
+                                {/*                    </DropdownMenuItem>*/}
+                                {/*                ))}*/}
+                                {/*            </DropdownMenuContent>*/}
+                                {/*        </DropdownMenu>*/}
+                                {/*        <Button*/}
+                                {/*            variant="outline"*/}
+                                {/*            size="sm"*/}
+                                {/*            onClick={() => handleGeneratePDF(order)}*/}
+                                {/*            disabled={isGenerating}*/}
+                                {/*            className="h-8 w-8 p-0"*/}
+                                {/*            title="Generate PDF"*/}
+                                {/*        >*/}
+                                {/*            <FileText className="h-4 w-4"/>*/}
+                                {/*        </Button>*/}
+                                {/*        <Button*/}
+                                {/*            variant="outline"*/}
+                                {/*            size="sm"*/}
+                                {/*            className="h-8 w-8 p-0 bg-transparent"*/}
+                                {/*            title="View Details"*/}
+                                {/*            onClick={() => {*/}
+                                {/*                console.log("View order details:", order.id)*/}
+                                {/*            }}*/}
+                                {/*        >*/}
+                                {/*            <Eye className="h-4 w-4"/>*/}
+                                {/*        </Button>*/}
+                                {/*    </div>*/}
+                                {/*</TableCell>*/}
                             </TableRow>
                         ))
                     )}

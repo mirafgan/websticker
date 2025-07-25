@@ -85,6 +85,7 @@ model Customer {
   dico           String?   @unique
   Orders         Order[]
   deletedAt      DateTime? @map("deleted_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
 
   @@map("customer")
 }
@@ -108,6 +109,7 @@ model Product {
   id       Int    @id @default(autoincrement())
   name     String
   price    Int
+  quantity Int    @default(1)
   material String
   size     String
   Order    Order? @relation(fields: [orderId], references: [id])
@@ -125,9 +127,10 @@ enum Status {
 }
 
 model OrderStatus {
-  id    Int     @id @default(autoincrement())
-  name  Status  @default(DRAFT)
-  Order Order[]
+  id        Int       @id @default(autoincrement())
+  name      Status    @default(DRAFT)
+  Order     Order[]
+  deletedAt DateTime?
 
   @@map("order_status")
 }

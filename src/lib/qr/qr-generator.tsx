@@ -1,5 +1,5 @@
 import QRCode from "qrcode"
-import { getQRSettings } from "../config/qr-settings"
+import {getQRSettings} from "../config/qr-settings"
 
 export interface QRCodeOptions {
     width?: number
@@ -97,6 +97,7 @@ export class QRGenerator {
             const base64Data = dataURL.split(",")[1]
 
             // Base64'ü binary'ye çevir
+            // @ts-ignore
             const binaryString = atob(base64Data)
             const bytes = new Uint8Array(binaryString.length)
 

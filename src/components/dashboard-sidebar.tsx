@@ -5,12 +5,12 @@ import Link from "next/link"
 import {usePathname} from "next/navigation"
 import {cn} from "@/lib/utils"
 import {Button} from "@/components/ui/button"
-import {Store, ShoppingBag, Package, Users, BarChart3, Settings, ChevronLeft, ChevronRight} from "lucide-react"
+import {ChevronLeft, ChevronRight, ShoppingBag, Store, Users} from "lucide-react"
 
 const navigation = [
     {name: "Orders", href: "/dashboard/orders", icon: ShoppingBag},
     // { name: "Products", href: "/dashboard/products", icon: Package },
-    // { name: "Customers", href: "/dashboard/customers", icon: Users },
+    {name: "Customers", href: "/dashboard/customers", icon: Users},
     // { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
     // { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ]

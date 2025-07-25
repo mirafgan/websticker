@@ -15,17 +15,18 @@ export default function OrdersPage() {
     const [statusFilter, setStatusFilter] = useState<string>("all")
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
-    const orderMutation = api.order.create.useMutation()
+    const orderMutation = api.order.create.useMutation();
     const allOrderQuery = api.order.getAllOrders.useQuery()
+    const allStatusQuery = api.order.getAllOrdersStatus.useQuery();
+    const updateOrderStatusMutation = api.order.updateOrderStatus.useMutation({
+        onSuccess: () => {
+            allOrderQuery.refetch()
+        }
+    });
     const {data: ordersResponse, isLoading} = allOrderQuery
+    const {data: statusResponse} = allStatusQuery
     const orders = ordersResponse?.data ?? []
-
-    // Get unique statuses from orders for filter options
-    const availableStatuses = useMemo(() => {
-        const statuses = orders.map((order) => order.status)
-        const uniqueStatuses = statuses.filter((status, index, self) => index === self.findIndex((s) => s.id === status.id))
-        return uniqueStatuses
-    }, [orders])
+    const statuses = statusResponse?.data ?? []
 
     // Filter orders based on search term and status
     const filteredOrders = useMemo(() => {
@@ -56,10 +57,18 @@ export default function OrdersPage() {
 
     const handleCreateOrder = async (orderData: any) => {
         try {
-            await orderMutation.mutateAsync(orderData)
-            allOrderQuery.refetch()
+            await orderMutation.mutateAsync(orderData);
+            await allOrderQuery.refetch();
         } catch (error) {
             console.error("Failed to create order:", error)
+        }
+    }
+
+    async function handleStatusUpdate(id: number, statusId: number) {
+        try {
+            await updateOrderStatusMutation.mutateAsync({id, statusId})
+        } catch (e) {
+            console.log(e)
         }
     }
 
@@ -82,21 +91,7 @@ export default function OrdersPage() {
                         <CardTitle>All orders</CardTitle>
                         <div className="flex items-center gap-4">
                             {/* Status Filter */}
-                            <div className="w-48">
-                                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Filter by status"/>
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="all">All Statuses</SelectItem>
-                                        {availableStatuses.map((status) => (
-                                            <SelectItem key={status.id} value={status.id.toString()}>
-                                                {status.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
+
 
                             {/* Search Input */}
                             <div className="relative w-64">
@@ -109,17 +104,32 @@ export default function OrdersPage() {
                                     className="pl-10"
                                 />
                             </div>
+                            <div className="">
+                                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Filter by status"/>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">All Statuses</SelectItem>
+                                        {statuses.map((status) => (
+                                            <SelectItem key={status.id} value={status.id.toString()}>
+                                                {status.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
                     </div>
 
                     {/* Filter Summary */}
                     {(statusFilter !== "all" || searchTerm) && (
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span>
-                Showing {filteredOrders.length} of {orders.length} orders
-              </span>
+                          <span>
+                            Showing {filteredOrders.length} of {orders.length} orders
+                          </span>
                             {statusFilter !== "all" && (
-                                <span>• Status: {availableStatuses.find((s) => s.id.toString() === statusFilter)?.name}</span>
+                                <span>• Status: {statuses.find((s) => s.id.toString() === statusFilter)?.name}</span>
                             )}
                             {searchTerm && <span>• Search: "{searchTerm}"</span>}
                             <Button
@@ -142,7 +152,7 @@ export default function OrdersPage() {
                             <div className="text-gray-500">Loading orders...</div>
                         </div>
                     ) : (
-                        <OrderTable orders={filteredOrders}/>
+                        <OrderTable orders={filteredOrders} statuses={statuses} statusOnSubmit={handleStatusUpdate}/>
                     )}
                 </CardContent>
             </Card>
