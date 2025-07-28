@@ -1,33 +1,33 @@
 import "@/styles/globals.css";
 
-import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import type {Metadata} from "next";
+import {Geist} from "next/font/google";
 
-import { TRPCReactProvider } from "@/trpc/react";
-import { ThemeProvider } from "@/components/theme-provider";
-import { Toaster } from "sonner";
+import {TRPCReactProvider} from "@/trpc/react";
+import {ThemeProvider} from "@/components/theme-provider";
+import {Toaster} from "sonner";
 
 export const metadata: Metadata = {
-	title: " - Web Sticker",
-	icons: [{ rel: "icon", url: "/favicon.ico" }],
+    title: " - Web Sticker",
+    icons: [{rel: "icon", url: "/favicon.ico"}],
 };
 
 const geist = Geist({
-	subsets: ["latin"],
-	variable: "--font-geist-sans",
+    subsets: ["latin"],
+    variable: "--font-geist-sans",
 });
 
 export default function RootLayout({
-	children,
-}: Readonly<{ children: React.ReactNode }>) {
-	return (
-		<html lang="en" className={`${geist.variable}`}>
-			<body>
-				<ThemeProvider>
-					<Toaster/>
-					<TRPCReactProvider>{children}</TRPCReactProvider>
-				</ThemeProvider>
-			</body>
-		</html>
-	);
+                                       children,
+                                   }: Readonly<{ children: React.ReactNode }>) {
+    return (
+        <html lang="en" className={`${geist.variable}`}>
+        <body>
+        <ThemeProvider>
+            <Toaster/>
+            <TRPCReactProvider>{children}</TRPCReactProvider>
+        </ThemeProvider>
+        </body>
+        </html>
+    );
 }

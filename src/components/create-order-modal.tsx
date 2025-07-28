@@ -103,8 +103,8 @@ export function CreateOrderModal({isOpen, onClose, onSubmit}: CreateOrderModalPr
                 contact: "",
                 country: "",
                 cargoAddress: "",
-                ico:null,
-                dico:null,
+                ico: null,
+                dico: null,
                 billingAddress: "",
             })
             setItems([{id: "1", name: "", price: 0, quantity: 1, size: "", material: ""}])
@@ -151,8 +151,8 @@ export function CreateOrderModal({isOpen, onClose, onSubmit}: CreateOrderModalPr
                 email: "",
                 company: "",
                 contact: "",
-                ico:null,
-                dico:null,
+                ico: null,
+                dico: null,
                 country: "",
                 cargoAddress: "",
                 billingAddress: "",

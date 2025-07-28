@@ -29,6 +29,7 @@ export const customerRouter = createTRPCRouter({
                         surname,
                         country
                     } = input;
+
                     const customer = await
                         ctx.db.customer.create({
                             data: {

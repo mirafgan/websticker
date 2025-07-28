@@ -1,10 +1,10 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { LogOut } from "lucide-react"
-import { getServerSession } from "@/server/auth"
-import { TooltipProvider } from "@radix-ui/react-tooltip"
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip"
+import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar"
+import {Card, CardContent} from "@/components/ui/card"
+import {Button} from "@/components/ui/button"
+import {LogOut} from "lucide-react"
+import {getServerSession} from "@/server/auth"
+import {TooltipProvider} from "@radix-ui/react-tooltip"
+import {Tooltip, TooltipContent, TooltipTrigger} from "./ui/tooltip"
 
 const UserCartBanner = async () => {
     const session = await getServerSession()
@@ -28,7 +28,7 @@ const UserCartBanner = async () => {
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <Avatar>
-                                    <AvatarImage src={user.image ?? undefined} alt={user.name ?? "User avatar"} />
+                                    <AvatarImage src={user.image ?? undefined} alt={user.name ?? "User avatar"}/>
                                     <AvatarFallback>
                                         {user.name
                                             ?.split(" ")
@@ -49,12 +49,12 @@ const UserCartBanner = async () => {
                 </div>
                 <form action="/api/auth/signout" method="POST">
                     <Button variant="ghost" size="icon" type="submit" aria-label="Logout">
-                        <LogOut className="h-4 w-4" />
+                        <LogOut className="h-4 w-4"/>
                         <span className="sr-only">Logout</span>
                     </Button>
                 </form>
             </CardContent>
-        </Card >
+        </Card>
     )
 }
 

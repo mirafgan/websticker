@@ -1,36 +1,57 @@
 "use client"
 
 import {Button} from "@/components/ui/button";
-import {Card, CardContent, CardHeader, CardTitle, CardDescription} from "@/components/ui/card";
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
 import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {type FormEvent, useState} from "react";
-import {Eye, EyeOff, Loader2, Store} from "lucide-react";
+import {Eye, EyeOff, Store} from "lucide-react";
 import {useRouter} from "next/navigation";
 import {api} from "@/trpc/react";
+import {toast} from "sonner";
 import {setCookie} from "@/actions/cookie-action";
+
 
 export default function SignIn() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false)
-    const [rememberMe, setRememberMe] = useState(false);
     const router = useRouter();
-    const loginMutation = api.auth.login.useMutation();
-    const {data, isPending: loading, isSuccess} = loginMutation
+    const loginMutation = api.auth.login.useMutation({
+        onSuccess: (ctx) => {
+            if (ctx?.token) {
+                ctx?.token && setCookie("Authorization", ctx?.token ?? '');
+                toast("Login successfully. Redirecting to dashboard")
+                router.refresh();
+                return
+            }
+            toast("Email or Password is wrong")
+        },
+        onError: async (ctx) => {
+            const zodErrors = ctx.data?.zodError?.fieldErrors
+            if (zodErrors)
+                for (const key in zodErrors) {
+                    await new Promise((resolve) => {
+                        setTimeout(() => resolve((() => {
+                            return toast(`${key}: ${zodErrors?.[key]?.[0]} \n`)
+                        })()), 1000)
+                    })
+                }
+        }
+    });
+
+    const {isPending: loading, isSuccess} = loginMutation
     const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         try {
             loginMutation.mutate({email, password})
 
         } catch (e) {
+            // toast({value: "Email or Password is wrong"})
             console.log(e)
         }
     };
-    if (isSuccess && !loading) {
-        data?.token && setCookie("Authorization", data?.token ?? '')
-        router.refresh();
-    }
+
     return (
         <Card className="w-full max-w-md">
             <CardHeader className="text-center">

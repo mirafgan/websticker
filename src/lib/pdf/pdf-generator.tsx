@@ -12,7 +12,7 @@ export interface InvoiceData {
         name: string
         price: number
         quantity: number
-        material:string
+        material: string
         size: string
     }>
 }

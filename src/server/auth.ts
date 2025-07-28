@@ -1,10 +1,10 @@
-import { betterAuth } from "better-auth";
-import { prismaAdapter } from "better-auth/adapters/prisma";
-import { db } from "@/server/db";
-import { username, admin,  } from "better-auth/plugins";
-import { env } from "@/env";
-import { headers } from "next/headers";
-import { nextCookies } from "better-auth/next-js";
+import {betterAuth} from "better-auth";
+import {prismaAdapter} from "better-auth/adapters/prisma";
+import {db} from "@/server/db";
+import {admin, username,} from "better-auth/plugins";
+import {env} from "@/env";
+import {headers} from "next/headers";
+import {nextCookies} from "better-auth/next-js";
 
 const colors = {
     info: "\x1b[36m",
@@ -15,8 +15,8 @@ const colors = {
 };
 
 export const auth = betterAuth({
-    database: prismaAdapter(db, { provider: "postgresql" }),
-    plugins: [username(), admin(),  nextCookies()],
+    database: prismaAdapter(db, {provider: "postgresql"}),
+    plugins: [username(), admin(), nextCookies()],
     emailAndPassword: {
         enabled: true,
         minPasswordLength: 8,

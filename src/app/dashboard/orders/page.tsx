@@ -156,7 +156,7 @@ export default function OrdersPage() {
                     )}
                 </CardContent>
             </Card>
-
+            {/*<InvoiceGenerator />*/}
             <CreateOrderModal
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}

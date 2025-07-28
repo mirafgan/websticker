@@ -2,6 +2,9 @@
 
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table"
 import {countries} from "@/lib/countries"
+import {Button} from "@/components/ui/button";
+import {Trash2} from "lucide-react";
+import {api} from "@/trpc/react";
 
 interface Customer {
     id: number
@@ -38,7 +41,22 @@ const formatDate = (dateString: Date) => {
 }
 
 export default function CustomerTable({customers, onEdit}: CustomerTableProps) {
-    console.log(customers)
+    const deleteCustomerMutation = api.customer.deleteCustomer.useMutation({
+        onSuccess: (ctx) => {
+            console.log(ctx)
+        },
+        onError: (err) => {
+            console.log(err)
+        }
+    })
+
+    function handleDelete(id: number) {
+        if (id) {
+            deleteCustomerMutation.mutate({id})
+        }
+
+    }
+
     return (
         <div className="rounded-md border">
             <Table>
@@ -53,7 +71,7 @@ export default function CustomerTable({customers, onEdit}: CustomerTableProps) {
                         <TableHead className="w-[200px]">Cargo Address</TableHead>
                         <TableHead className="w-[120px]">Country</TableHead>
                         <TableHead className="w-[120px]">Created</TableHead>
-                        {/*<TableHead className="w-[100px]">Actions</TableHead>*/}
+                        <TableHead className="w-[100px]">Actions</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -146,30 +164,39 @@ export default function CustomerTable({customers, onEdit}: CustomerTableProps) {
                                 </TableCell>
                                 <TableCell
                                     className="text-sm text-muted-foreground">{formatDate(customer.createdAt)}</TableCell>
-                                {/*<TableCell>*/}
-                                {/*    <div className="flex items-center gap-2">*/}
-                                {/*        <Button*/}
-                                {/*            variant="outline"*/}
-                                {/*            size="sm"*/}
-                                {/*            className="h-8 w-8 p-0 bg-transparent"*/}
-                                {/*            title="Edit Customer"*/}
-                                {/*            onClick={() => onEdit?.(customer)}*/}
-                                {/*        >*/}
-                                {/*            <Edit className="h-4 w-4"/>*/}
-                                {/*        </Button>*/}
-                                {/*        <Button*/}
-                                {/*            variant="outline"*/}
-                                {/*            size="sm"*/}
-                                {/*            className="h-8 w-8 p-0 bg-transparent"*/}
-                                {/*            title="View Details"*/}
-                                {/*            onClick={() => {*/}
-                                {/*                console.log("View customer details:", customer.id)*/}
-                                {/*            }}*/}
-                                {/*        >*/}
-                                {/*            <Eye className="h-4 w-4"/>*/}
-                                {/*        </Button>*/}
-                                {/*    </div>*/}
-                                {/*</TableCell>*/}
+                                <TableCell>
+                                    <div className="flex items-center gap-2">
+                                        <Button
+                                            variant="destructive"
+                                            size="sm"
+                                            className="h-8 w-8 p-0"
+                                            title="Edit Customer"
+                                            onClick={() => handleDelete(customer.id)}
+                                        >
+                                            <Trash2 className="h-4 w-4"/>
+                                        </Button>
+                                        {/*<Button*/}
+                                        {/*    variant="outline"*/}
+                                        {/*    size="sm"*/}
+                                        {/*    className="h-8 w-8 p-0 bg-transparent"*/}
+                                        {/*    title="Edit Customer"*/}
+                                        {/*    onClick={() => onEdit?.(customer)}*/}
+                                        {/*>*/}
+                                        {/*    <Edit className="h-4 w-4"/>*/}
+                                        {/*</Button>*/}
+                                        {/*<Button*/}
+                                        {/*    variant="outline"*/}
+                                        {/*    size="sm"*/}
+                                        {/*    className="h-8 w-8 p-0 bg-transparent"*/}
+                                        {/*    title="View Details"*/}
+                                        {/*    onClick={() => {*/}
+                                        {/*        console.log("View customer details:", customer.id)*/}
+                                        {/*    }}*/}
+                                        {/*>*/}
+                                        {/*    <Eye className="h-4 w-4"/>*/}
+                                        {/*</Button>*/}
+                                    </div>
+                                </TableCell>
                             </TableRow>
                         ))
                     )}

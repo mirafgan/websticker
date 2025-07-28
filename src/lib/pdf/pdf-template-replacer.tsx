@@ -47,9 +47,9 @@ export class PDFTemplateReplacer {
             }
 
             // Parse customer name
-            const nameParts = order.customer.split(" ")
-            const firstName = nameParts[0] || ""
-            const lastName = nameParts.slice(1).join(" ") || ""
+
+            const firstName = order.contact.name || ""
+            const lastName = order.contact.surname || ""
 
             // Add QR Code (top right) - only if successfully generated
             if (qrCodeImage) {
@@ -62,6 +62,7 @@ export class PDFTemplateReplacer {
                 })
 
                 // QR Code label
+
                 firstPage?.drawText("Scan to track", {
                     x: width - qrSize - 30,
                     y: height - qrSize - 45,
@@ -74,9 +75,15 @@ export class PDFTemplateReplacer {
             // Add text overlays on the template
             const overlays = [
                 {text: `${firstName} ${lastName}`, x: 100, y: height - 200, size: 14, font: boldFont},
-                {text: order.email, x: 100, y: height - 220, size: 12, font: font},
+                {text: order.contact.email, x: 100, y: height - 220, size: 12, font: font},
                 {text: `Order #${order.id}`, x: 100, y: height - 250, size: 12, font: boldFont},
-                {text: order.date, x: 100, y: height - 270, size: 12, font: font},
+                {
+                    text: new Date(order.createdAt).toLocaleDateString("tr-TR"),
+                    x: 100,
+                    y: height - 270,
+                    size: 12,
+                    font: font
+                },
                 {text: `$${order.total.toFixed(2)}`, x: 400, y: height - 250, size: 14, font: boldFont},
             ]
 
