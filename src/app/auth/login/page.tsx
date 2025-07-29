@@ -7,7 +7,6 @@ const page = async () => {
     if (session) {
         redirect('/')
     }
-    console.log(session)
 
 
     return (
