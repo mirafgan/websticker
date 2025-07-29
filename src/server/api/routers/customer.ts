@@ -74,6 +74,7 @@ export const customerRouter = createTRPCRouter({
                 return ({message: "Not Found", status: 404, customer: null})
             }
         }),
+
     deleteCustomer: publicProcedure
         .input(z.object({
             id: z.number()

@@ -6,6 +6,7 @@ import {Geist} from "next/font/google";
 import {TRPCReactProvider} from "@/trpc/react";
 import {ThemeProvider} from "@/components/theme-provider";
 import {Toaster} from "sonner";
+import {Analytics} from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
     title: " - Web Sticker",
@@ -27,6 +28,7 @@ export default function RootLayout({
             <Toaster/>
             <TRPCReactProvider>{children}</TRPCReactProvider>
         </ThemeProvider>
+        <Analytics/>
         </body>
         </html>
     );
