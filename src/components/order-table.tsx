@@ -8,6 +8,7 @@ import {countries} from "@/lib/countries"
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 import {Button} from "@/components/ui/button";
 import {ChevronDown, FileText, Trash2} from "lucide-react";
+import useConfirmationModalStore from "@/store/confirmation-modal-store";
 
 interface IOrderTable {
     orders: Order[]
@@ -56,6 +57,8 @@ const getCountryName = (countryId: string) => {
 
 export default function OrderTable({orders, statuses, statusOnSubmit, handleDeleteOrder}: IOrderTable) {
     const {isGenerating, generateInvoice, generateFromTemplate} = usePDFGenerator();
+    const {openModal, ...rest} = useConfirmationModalStore()
+    console.log(rest)
 
     async function handleGeneratePDF(order: Order) {
         try {
@@ -71,6 +74,14 @@ export default function OrderTable({orders, statuses, statusOnSubmit, handleDele
         }
     }
 
+    function handleDelete(id: number) {
+        openModal({
+            title: "Are you sure you want to delete this order?",
+            content: "This action cannot be undone. The order and all its associated data will be permanently deleted.",
+            onSubmit: () => handleDeleteOrder(id),
+            isOpen: true
+        })
+    }
 
     return (
         <div className="rounded-md border">
@@ -179,7 +190,7 @@ export default function OrderTable({orders, statuses, statusOnSubmit, handleDele
                                             size="sm"
                                             className="h-8 w-8 p-0"
                                             title="Delete Order"
-                                            onClick={() => handleDeleteOrder(order.id)}
+                                            onClick={() => handleDelete(order.id)}
                                         >
                                             <Trash2 className="h-4 w-4"/>
                                         </Button>

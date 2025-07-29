@@ -77,8 +77,8 @@ export default function OrdersPage() {
         }
     }
 
-    function handleDeleteOrder(id: number) {
-        deleteOrderMutation.mutate({id})
+    async function handleDeleteOrder(id: number) {
+        await deleteOrderMutation.mutateAsync({id})
     }
 
     return (

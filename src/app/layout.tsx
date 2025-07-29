@@ -7,6 +7,7 @@ import {TRPCReactProvider} from "@/trpc/react";
 import {ThemeProvider} from "@/components/theme-provider";
 import {Toaster} from "sonner";
 import {Analytics} from "@vercel/analytics/next";
+import ConfirmationModal from "@/components/modals/confirmation-modal";
 
 export const metadata: Metadata = {
     title: " - Web Sticker",
@@ -27,6 +28,7 @@ export default function RootLayout({
         <ThemeProvider>
             <Toaster/>
             <TRPCReactProvider>{children}</TRPCReactProvider>
+            <ConfirmationModal/>
         </ThemeProvider>
         <Analytics/>
         </body>
