@@ -18,6 +18,11 @@ export default function OrdersPage() {
     const orderMutation = api.order.create.useMutation();
     const allOrderQuery = api.order.getAllOrders.useQuery()
     const allStatusQuery = api.order.getAllOrdersStatus.useQuery();
+    const deleteOrderMutation = api.order.deleteOrder.useMutation({
+        onSuccess: () => {
+            allOrderQuery.refetch()
+        }
+    })
     const updateOrderStatusMutation = api.order.updateOrderStatus.useMutation({
         onSuccess: () => {
             allOrderQuery.refetch()
@@ -70,6 +75,10 @@ export default function OrdersPage() {
         } catch (e) {
             console.log(e)
         }
+    }
+
+    function handleDeleteOrder(id: number) {
+        deleteOrderMutation.mutate({id})
     }
 
     return (
@@ -152,7 +161,8 @@ export default function OrdersPage() {
                             <div className="text-gray-500">Loading orders...</div>
                         </div>
                     ) : (
-                        <OrderTable orders={filteredOrders} statuses={statuses} statusOnSubmit={handleStatusUpdate}/>
+                        <OrderTable orders={filteredOrders} handleDeleteOrder={handleDeleteOrder} statuses={statuses}
+                                    statusOnSubmit={handleStatusUpdate}/>
                     )}
                 </CardContent>
             </Card>

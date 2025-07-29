@@ -18,8 +18,6 @@ export const orderRouter = createTRPCRouter({
         .mutation(async ({ctx, input}) => {
                 try {
                     const {notes, customerId, total} = input;
-
-
                     const order = await
                         ctx.db.order.create({
                             data: {
@@ -104,7 +102,7 @@ export const orderRouter = createTRPCRouter({
         }))
         .mutation(async ({input, ctx}) => {
             try {
-                const customer = await ctx.db.customer.update({where: {id: input.id}, data: {deletedAt: new Date()}});
+                const customer = await ctx.db.order.update({where: {id: input.id}, data: {deletedAt: new Date()}});
                 return {message: "Order successfully deleted", customer}
             } catch (e) {
                 console.log(e)

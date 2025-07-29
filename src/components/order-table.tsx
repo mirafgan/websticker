@@ -7,12 +7,13 @@ import {usePDFGenerator} from "@/hooks/use-pdf-generator"
 import {countries} from "@/lib/countries"
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 import {Button} from "@/components/ui/button";
-import {ChevronDown, FileText} from "lucide-react";
+import {ChevronDown, FileText, Trash2} from "lucide-react";
 
 interface IOrderTable {
     orders: Order[]
     statuses: Status[]
     statusOnSubmit: (id: number, statusId: number) => void
+    handleDeleteOrder: (id: number) => void
 }
 
 const getStatusColor = (status: string) => {
@@ -53,9 +54,8 @@ const getCountryName = (countryId: string) => {
     return country?.name || countryId
 }
 
-export default function OrderTable({orders, statuses, statusOnSubmit}: IOrderTable) {
-    const {isGenerating, generateInvoice, generateFromTemplate} = usePDFGenerator()
-
+export default function OrderTable({orders, statuses, statusOnSubmit, handleDeleteOrder}: IOrderTable) {
+    const {isGenerating, generateInvoice, generateFromTemplate} = usePDFGenerator();
 
     async function handleGeneratePDF(order: Order) {
         try {
@@ -174,6 +174,15 @@ export default function OrderTable({orders, statuses, statusOnSubmit}: IOrderTab
                                                 ))}
                                             </DropdownMenuContent>
                                         </DropdownMenu>
+                                        <Button
+                                            variant="destructive"
+                                            size="sm"
+                                            className="h-8 w-8 p-0"
+                                            title="Delete Order"
+                                            onClick={() => handleDeleteOrder(order.id)}
+                                        >
+                                            <Trash2 className="h-4 w-4"/>
+                                        </Button>
                                         <Button
                                             variant="outline"
                                             size="sm"
