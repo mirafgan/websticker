@@ -45,7 +45,6 @@ export interface Product {
     quantity: number
     material: string
     size: string
-    orderId: number | null
 }
 
 export interface Status {

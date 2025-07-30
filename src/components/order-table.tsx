@@ -7,7 +7,7 @@ import {usePDFGenerator} from "@/hooks/use-pdf-generator"
 import {countries} from "@/lib/countries"
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 import {Button} from "@/components/ui/button";
-import {ChevronDown, FileText, Trash2} from "lucide-react";
+import {ChevronDown, Edit2, FileText, Trash2} from "lucide-react";
 import useConfirmationModalStore from "@/store/confirmation-modal-store";
 
 interface IOrderTable {
@@ -15,6 +15,7 @@ interface IOrderTable {
     statuses: Status[]
     statusOnSubmit: (id: number, statusId: number) => void
     handleDeleteOrder: (id: number) => void
+    handleEditOrder: (order: Order) => void
 }
 
 const getStatusColor = (status: string) => {
@@ -55,10 +56,15 @@ const getCountryName = (countryId: string) => {
     return country?.name || countryId
 }
 
-export default function OrderTable({orders, statuses, statusOnSubmit, handleDeleteOrder}: IOrderTable) {
+export default function OrderTable({
+                                       orders,
+                                       statuses,
+                                       statusOnSubmit,
+                                       handleDeleteOrder,
+                                       handleEditOrder
+                                   }: IOrderTable) {
     const {isGenerating, generateInvoice, generateFromTemplate} = usePDFGenerator();
-    const {openModal, ...rest} = useConfirmationModalStore()
-    console.log(rest)
+    const {openModal} = useConfirmationModalStore()
 
     async function handleGeneratePDF(order: Order) {
         try {
@@ -95,7 +101,7 @@ export default function OrderTable({orders, statuses, statusOnSubmit, handleDele
                         <TableHead className="w-[100px]">Status</TableHead>
                         <TableHead className="w-[120px]">Total</TableHead>
                         <TableHead className="max-w-[200px]">Notes</TableHead>
-                        {/*<TableHead className="w-[100px]">Actions</TableHead>*/}
+                        <TableHead className="w-[100px]">Actions</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -185,15 +191,7 @@ export default function OrderTable({orders, statuses, statusOnSubmit, handleDele
                                                 ))}
                                             </DropdownMenuContent>
                                         </DropdownMenu>
-                                        <Button
-                                            variant="destructive"
-                                            size="sm"
-                                            className="h-8 w-8 p-0"
-                                            title="Delete Order"
-                                            onClick={() => handleDelete(order.id)}
-                                        >
-                                            <Trash2 className="h-4 w-4"/>
-                                        </Button>
+
                                         <Button
                                             variant="outline"
                                             size="sm"
@@ -203,6 +201,24 @@ export default function OrderTable({orders, statuses, statusOnSubmit, handleDele
                                             title="Generate PDF"
                                         >
                                             <FileText className="h-4 w-4"/>
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => handleEditOrder(order)}
+                                            className="h-8 w-8 p-0"
+                                            title="Generate PDF"
+                                        >
+                                            <Edit2 className="h-4 w-4"/>
+                                        </Button>
+                                        <Button
+                                            variant="destructive"
+                                            size="sm"
+                                            className="h-8 w-8 p-0"
+                                            title="Delete Order"
+                                            onClick={() => handleDelete(order.id)}
+                                        >
+                                            <Trash2 className="h-4 w-4"/>
                                         </Button>
                                         {/*<Button*/}
                                         {/*    variant="outline"*/}

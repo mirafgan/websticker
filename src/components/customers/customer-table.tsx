@@ -5,6 +5,7 @@ import {countries} from "@/lib/countries"
 import {Button} from "@/components/ui/button";
 import {Trash2} from "lucide-react";
 import {api} from "@/trpc/react";
+import useConfirmationModalStore from "@/store/confirmation-modal-store";
 
 interface Customer {
     id: number
@@ -48,11 +49,17 @@ export default function CustomerTable({customers, onEdit}: CustomerTableProps) {
         onError: (err) => {
             console.log(err)
         }
-    })
+    });
+    const {openModal} = useConfirmationModalStore();
 
     function handleDelete(id: number) {
         if (id) {
-            deleteCustomerMutation.mutate({id})
+            openModal({
+                title: "Are you sure you want to delete this customer?",
+                content: "This action cannot be undone. The customer and all its associated data will be permanently deleted.",
+                onSubmit: () => deleteCustomerMutation.mutate({id}),
+                isOpen: true
+            });
         }
 
     }

@@ -94,7 +94,7 @@ model Customer {
 
 model Order {
   id         Int         @id @default(autoincrement())
-  total      Int
+  total      Float
   notes      String
   customerId Int         @default(0) @map("customer_id")
   contact    Customer    @relation(fields: [customerId], references: [id], onDelete: SetDefault)

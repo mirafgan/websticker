@@ -60,6 +60,36 @@ export const orderRouter = createTRPCRouter({
             return ({message: "Not Found", status: 404, data: []})
         }
     }),
+    getAllOrders: publicProcedure
+        .query(async ({ctx}) => {
+            try {
+                const orders = await ctx.db.order.findMany({
+                    where: {deletedAt: null},
+                    select: {
+                        products: {
+                            select: {
+                                id: true,
+                                name: true,
+                                quantity: true,
+                                size: true,
+                                material: true,
+                                price: true,
+                            }
+                        },
+                        status: true,
+                        contact: true,
+                        id: true,
+                        total: true,
+                        notes: true,
+                        createdAt: true
+                    }
+                });
+                return {message: "Orders found", data: orders}
+            } catch (e) {
+                console.log(e);
+                return ({message: "Not Found", status: 404, data: []})
+            }
+        }),
     updateOrderStatus: publicProcedure
         .input(z.object({
             id: z.number(),
@@ -75,25 +105,44 @@ export const orderRouter = createTRPCRouter({
                 return ({message: "Something went wrong"})
             }
         }),
-    getAllOrders: publicProcedure
-        .query(async ({ctx}) => {
+    updateOrder: publicProcedure
+        .input(z.object({
+            id: z.number(),
+            notes: z.string(),
+            customerId: z.number(),
+            total: z.number(),
+            products: z.array(z.object({
+                id: z.number(),
+                name: z.string(),
+                quantity: z.number(),
+                size: z.string(),
+                material: z.string(),
+                price: z.number(),
+            })),
+        }))
+        .mutation(async ({ctx, input}) => {
             try {
-                const orders = await ctx.db.order.findMany({
-                    where: {deletedAt: null},
-                    select: {
-                        products: true,
-                        status: true,
-                        contact: true,
-                        id: true,
-                        total: true,
-                        notes: true,
-                        createdAt: true
-                    }
-                });
-                return {message: "Orders found", data: orders}
+                const updateProductsQueries = input.products.map(({id, ...rest}) =>
+                    id > 0 ? ctx.db.product
+                        .update({
+                            where: {id},
+                            data: {...rest},
+                        }) : ctx.db.product
+                        .create({
+                            data: {...rest, orderId: input.id},
+                        })
+                );
+
+                await ctx.db.$transaction([
+                    ...updateProductsQueries,
+                    ctx.db.order.update({
+                        where: {id: input.id},
+                        data: {notes: input.notes, customerId: input.customerId, total: input.total}
+                    })
+                ])
+
             } catch (e) {
-                console.log(e);
-                return ({message: "Not Found", status: 404, data: []})
+                console.log(e)
             }
         }),
     deleteOrder: publicProcedure

@@ -1,7 +1,6 @@
 "use client"
 
-import type React from "react"
-import {useEffect, useState} from "react"
+import React, {useEffect, useState} from "react"
 import {Button} from "@/components/ui/button"
 import {Input} from "@/components/ui/input"
 import {Label} from "@/components/ui/label"
@@ -23,15 +22,17 @@ import {cn} from "@/lib/utils"
 import {api} from "@/trpc/react"
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select"
 import {countries} from "@/lib/countries"
+import type {Order} from "@/lib/types";
 
-interface CreateOrderModalProps {
+interface OrderModalProps {
     isOpen: boolean
     onClose: () => void
     onSubmit: (data: any) => void
+    editData: Order | null
 }
 
 interface OrderItem {
-    id: string
+    id: number
     name: string
     price: number
     quantity: number
@@ -54,7 +55,7 @@ interface Customer {
     deletedAt?: Date | null
 }
 
-export function CreateOrderModal({isOpen, onClose, onSubmit}: CreateOrderModalProps) {
+export function OrderModal({isOpen, onClose, onSubmit, editData}: OrderModalProps) {
     const allCustomerQuery = api.customer.getAllCustomer.useQuery()
     const createCustomerMutation = api.customer.createCustomer.useMutation({
         onSuccess: () => allCustomerQuery.refetch(),
@@ -78,7 +79,7 @@ export function CreateOrderModal({isOpen, onClose, onSubmit}: CreateOrderModalPr
         billingAddress: "",
     })
     const [items, setItems] = useState<OrderItem[]>([{
-        id: "1",
+        id: 1,
         name: "",
         price: 0,
         quantity: 1,
@@ -91,7 +92,7 @@ export function CreateOrderModal({isOpen, onClose, onSubmit}: CreateOrderModalPr
 
     // Reset form when modal closes
     useEffect(() => {
-        if (!isOpen) {
+        if (!isOpen && !editData) {
             setSelectedCustomer(null)
             setShowCreateCustomer(false)
             setNewCustomer({
@@ -107,14 +108,21 @@ export function CreateOrderModal({isOpen, onClose, onSubmit}: CreateOrderModalPr
                 dico: null,
                 billingAddress: "",
             })
-            setItems([{id: "1", name: "", price: 0, quantity: 1, size: "", material: ""}])
+            setItems([{id: 1, name: "", price: 0, quantity: 1, size: "", material: ""}])
             setNotes("")
         }
-    }, [isOpen])
+    }, [isOpen, editData]);
 
+    useEffect(() => {
+        if (editData) {
+            setSelectedCustomer(editData.contact);
+            setItems(editData.products);
+            setNotes(editData.notes);
+        }
+    }, [editData]);
     const addItem = () => {
         const newItem: OrderItem = {
-            id: Date.now().toString(),
+            id: -Date.now(),
             name: "",
             price: 0,
             size: "",
@@ -124,11 +132,11 @@ export function CreateOrderModal({isOpen, onClose, onSubmit}: CreateOrderModalPr
         setItems([...items, newItem])
     }
 
-    const removeItem = (id: string) => {
+    const removeItem = (id: number) => {
         setItems(items.filter((item) => item.id !== id))
     }
 
-    const updateItem = (id: string, field: keyof OrderItem, value: any) => {
+    const updateItem = (id: number, field: keyof OrderItem, value: any) => {
         setItems(items.map((item) => (item.id === id ? {...item, [field]: value} : item)))
     }
 
@@ -171,6 +179,7 @@ export function CreateOrderModal({isOpen, onClose, onSubmit}: CreateOrderModalPr
         setIsLoading(true)
 
         const orderData = {
+            ...(editData && {id: editData?.id}),
             customerId: selectedCustomer.id,
             products: items.filter((item) => item.name && item.price > 0),
             notes,
@@ -192,8 +201,8 @@ export function CreateOrderModal({isOpen, onClose, onSubmit}: CreateOrderModalPr
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle>Create order</DialogTitle>
-                    <DialogDescription>Add a new order to your store</DialogDescription>
+                    <DialogTitle>{editData ? "Update order" : "Create order"}</DialogTitle>
+                    <DialogDescription>{editData ? "Update an order from your store" : "Add a new order to your store"} </DialogDescription>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -619,7 +628,7 @@ export function CreateOrderModal({isOpen, onClose, onSubmit}: CreateOrderModalPr
                         </Button>
                         <Button type="submit" className="bg-green-600 hover:bg-green-700"
                                 disabled={isLoading || !selectedCustomer}>
-                            {isLoading ? "Creating..." : "Create order"}
+                            {isLoading ? editData ? "Updating..." : "Creating..." : editData ? "Update order" : "Create order"}
                         </Button>
                     </DialogFooter>
                 </form>
