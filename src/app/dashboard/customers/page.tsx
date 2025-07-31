@@ -4,17 +4,20 @@ import {useMemo, useState} from "react"
 import {Button} from "@/components/ui/button"
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card"
 import {Input} from "@/components/ui/input"
-import {CreateCustomerModal} from "@/components/customers/create-customer-modal"
+import {CustomerMutationModal} from "@/components/customers/customer-mutation-modal"
 import {Plus, Search} from "lucide-react"
 import CustomerTable from "@/components/customers/customer-table"
 import {api} from "@/trpc/react"
+import type {Customer} from "@/generated/prisma/client";
+import {toast} from "sonner";
 
 export default function CustomersPage() {
-    const [searchTerm, setSearchTerm] = useState("")
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-
+    const [searchTerm, setSearchTerm] = useState("");
+    const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
+    const [editCustomerData, setEditCustomerData] = useState<Customer | null>(null);
     // Replace these with your actual tRPC queries
-    const customerMutation = api.customer.createCustomer.useMutation()
+    const customerCreateMutation = api.customer.createCustomer.useMutation()
+    const customerUpdateMutation = api.customer.updateCustomer.useMutation()
     const allCustomersQuery = api.customer.getAllCustomer.useQuery()
 
     const {data: customersResponse, isLoading} = allCustomersQuery
@@ -38,16 +41,29 @@ export default function CustomersPage() {
 
     const handleCreateCustomer = async (customerData: any) => {
         try {
-            await customerMutation.mutateAsync(customerData)
+            await customerCreateMutation.mutateAsync(customerData)
             await allCustomersQuery.refetch()
         } catch (error) {
             console.error("Failed to create customer:", error)
         }
     }
 
-    const handleEditCustomer = (customer: any) => {
-        // Implement edit functionality
-        console.log("Edit customer:", customer)
+    const handleUpdateCustomer = async (customerData: any) => {
+        try {
+            await customerUpdateMutation.mutateAsync(customerData)
+            await allCustomersQuery.refetch()
+            toast.success("Customer updated successfully")
+        } catch (error) {
+            toast.error("Something went wrong.")
+            console.error("Failed to update customer:", error)
+        } finally {
+            setEditCustomerData(null);
+        }
+    }
+
+    const handleEditCustomer = (customer: Customer) => {
+        setEditCustomerData(customer);
+        setIsCustomerModalOpen(true)
     }
 
     return (
@@ -57,7 +73,7 @@ export default function CustomersPage() {
                     <h1 className="text-2xl font-bold text-gray-900">Customers</h1>
                     <p className="text-gray-600">Manage your customers</p>
                 </div>
-                <Button onClick={() => setIsCreateModalOpen(true)} className="bg-green-600 hover:bg-green-700">
+                <Button onClick={() => setIsCustomerModalOpen(true)} className="bg-green-600 hover:bg-green-700">
                     <Plus className="w-4 h-4 mr-2"/>
                     Create Customer
                 </Button>
@@ -107,10 +123,14 @@ export default function CustomersPage() {
                 </CardContent>
             </Card>
 
-            <CreateCustomerModal
-                isOpen={isCreateModalOpen}
-                onClose={() => setIsCreateModalOpen(false)}
-                onSubmit={handleCreateCustomer}
+            <CustomerMutationModal
+                isOpen={isCustomerModalOpen}
+                onClose={() => {
+                    setEditCustomerData(null);
+                    setIsCustomerModalOpen(false)
+                }}
+                editCustomerData={editCustomerData}
+                onSubmit={editCustomerData ? handleUpdateCustomer : handleCreateCustomer}
             />
         </div>
     )

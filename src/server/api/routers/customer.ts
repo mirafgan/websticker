@@ -1,20 +1,24 @@
 import {createTRPCRouter, publicProcedure} from "@/server/api/trpc";
 import {z} from "zod";
 
+const createCustomerSchema = z.object({
+    name: z.string(),
+    surname: z.string(),
+    email: z.string().email(),
+    company: z.string().nullable(),
+    contact: z.string(),
+    cargoAddress: z.string(),
+    billingAddress: z.string(),
+    ico: z.number().nullable(),
+    dico: z.string().nullable(),
+    country: z.string(),
+});
+const updateCustomerSchema = createCustomerSchema.extend({
+    id: z.number(),
+})
 export const customerRouter = createTRPCRouter({
     createCustomer: publicProcedure
-        .input(z.object({
-            name: z.string(),
-            surname: z.string(),
-            email: z.string().email(),
-            company: z.string().nullable(),
-            contact: z.string(),
-            cargoAddress: z.string(),
-            billingAddress: z.string(),
-            ico: z.number().nullable(),
-            dico: z.string().nullable(),
-            country: z.string(),
-        }))
+        .input(createCustomerSchema)
         .mutation(async ({ctx, input}) => {
                 try {
                     const {
@@ -74,7 +78,18 @@ export const customerRouter = createTRPCRouter({
                 return ({message: "Not Found", status: 404, customer: null})
             }
         }),
-
+    updateCustomer: publicProcedure
+        .input(updateCustomerSchema)
+        .mutation(async ({ctx, input}) => {
+            const {id, ...data} = input
+            try {
+                await ctx.db.customer.update({where: {id}, data});
+                return ({message: "Customer updated successfully"});
+            } catch (e) {
+                console.log(e);
+                return ({message: "Something went wrong"})
+            }
+        }),
     deleteCustomer: publicProcedure
         .input(z.object({
             id: z.number()

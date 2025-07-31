@@ -3,24 +3,25 @@
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table"
 import {countries} from "@/lib/countries"
 import {Button} from "@/components/ui/button";
-import {Trash2} from "lucide-react";
+import {Edit, Trash2} from "lucide-react";
 import {api} from "@/trpc/react";
 import useConfirmationModalStore from "@/store/confirmation-modal-store";
+import type {Customer} from "@/generated/prisma/client";
 
-interface Customer {
-    id: number
-    name: string
-    surname: string
-    email: string
-    ico: number | null
-    dico: string | null
-    billingAddress?: string
-    cargoAddress?: string
-    company: string | null
-    contact?: string
-    country?: string
-    createdAt: Date
-}
+// interface Customer {
+//     id: number
+//     name: string
+//     surname: string
+//     email: string
+//     ico: number | null
+//     dico: string | null
+//     billingAddress?: string
+//     cargoAddress?: string
+//     company: string | null
+//     contact?: string
+//     country?: string
+//     createdAt: Date
+// }
 
 interface CustomerTableProps {
     customers: Customer[]
@@ -182,26 +183,15 @@ export default function CustomerTable({customers, onEdit}: CustomerTableProps) {
                                         >
                                             <Trash2 className="h-4 w-4"/>
                                         </Button>
-                                        {/*<Button*/}
-                                        {/*    variant="outline"*/}
-                                        {/*    size="sm"*/}
-                                        {/*    className="h-8 w-8 p-0 bg-transparent"*/}
-                                        {/*    title="Edit Customer"*/}
-                                        {/*    onClick={() => onEdit?.(customer)}*/}
-                                        {/*>*/}
-                                        {/*    <Edit className="h-4 w-4"/>*/}
-                                        {/*</Button>*/}
-                                        {/*<Button*/}
-                                        {/*    variant="outline"*/}
-                                        {/*    size="sm"*/}
-                                        {/*    className="h-8 w-8 p-0 bg-transparent"*/}
-                                        {/*    title="View Details"*/}
-                                        {/*    onClick={() => {*/}
-                                        {/*        console.log("View customer details:", customer.id)*/}
-                                        {/*    }}*/}
-                                        {/*>*/}
-                                        {/*    <Eye className="h-4 w-4"/>*/}
-                                        {/*</Button>*/}
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="h-8 w-8 p-0 bg-transparent"
+                                            title="Edit Customer"
+                                            onClick={() => onEdit?.(customer)}
+                                        >
+                                            <Edit className="h-4 w-4"/>
+                                        </Button>
                                     </div>
                                 </TableCell>
                             </TableRow>

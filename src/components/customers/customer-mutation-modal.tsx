@@ -1,26 +1,27 @@
 "use client"
 
-import type React from "react"
-import {useState} from "react"
+import React, {useEffect, useState} from "react"
 import {Dialog, DialogContent, DialogHeader, DialogTitle} from "@/components/ui/dialog"
 import {Button} from "@/components/ui/button"
 import {Input} from "@/components/ui/input"
 import {Label} from "@/components/ui/label"
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select"
 import {countries} from "@/lib/countries"
+import type {Customer} from "@/generated/prisma/client";
 
 interface CreateCustomerModalProps {
     isOpen: boolean
     onClose: () => void
     onSubmit: (customerData: CustomerFormData) => Promise<void>
+    editCustomerData: Customer | null
 }
 
 interface CustomerFormData {
     name: string
     surname: string
     email: string
-    ico: string
-    dico: string
+    ico: number | null
+    dico: string | null
     billingAddress: string
     cargoAddress: string
     company: string
@@ -28,28 +29,39 @@ interface CustomerFormData {
     country: string
 }
 
-export function CreateCustomerModal({isOpen, onClose, onSubmit}: CreateCustomerModalProps) {
+const initialFormData = {
+    name: "",
+    surname: "",
+    email: "",
+    ico: null,
+    dico: "",
+    billingAddress: "",
+    cargoAddress: "",
+    company: "",
+    contact: "",
+    country: "",
+}
+
+export function CustomerMutationModal({isOpen, onClose, onSubmit, editCustomerData}: CreateCustomerModalProps) {
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const [formData, setFormData] = useState<CustomerFormData>({
-        name: "",
-        surname: "",
-        email: "",
-        ico: "",
-        dico: "",
-        billingAddress: "",
-        cargoAddress: "",
-        company: "",
-        contact: "",
-        country: "",
-    })
+    const [formData, setFormData] = useState<CustomerFormData>(initialFormData)
 
     const handleInputChange = (field: keyof CustomerFormData, value: string | number) => {
         setFormData((prev) => ({
             ...prev,
             [field]: value,
         }))
-    }
+    };
 
+    useEffect(() => {
+        if (editCustomerData) {
+            setFormData({
+                ...editCustomerData,
+                ico: editCustomerData.ico,
+                company: editCustomerData.company ?? ''
+            })
+        } else setFormData(initialFormData)
+    }, [editCustomerData]);
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
@@ -66,7 +78,7 @@ export function CreateCustomerModal({isOpen, onClose, onSubmit}: CreateCustomerM
                 name: "",
                 surname: "",
                 email: "",
-                ico: "",
+                ico: 0,
                 dico: "",
                 billingAddress: "",
                 cargoAddress: "",
@@ -86,7 +98,7 @@ export function CreateCustomerModal({isOpen, onClose, onSubmit}: CreateCustomerM
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle>Create New Customer</DialogTitle>
+                    <DialogTitle>{editCustomerData ? "Update Customer" : "Create New Customer"} </DialogTitle>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -188,7 +200,7 @@ export function CreateCustomerModal({isOpen, onClose, onSubmit}: CreateCustomerM
                                     <Label htmlFor="ico">ICO</Label>
                                     <Input
                                         id="ico"
-                                        value={formData.ico}
+                                        value={formData?.ico ?? 0}
                                         onChange={(e) => handleInputChange("ico", Number(e.target.value))}
                                         placeholder="Enter ICO number"
                                     />
@@ -198,7 +210,7 @@ export function CreateCustomerModal({isOpen, onClose, onSubmit}: CreateCustomerM
                                     <Label htmlFor="dico">DICO</Label>
                                     <Input
                                         id="dico"
-                                        value={formData.dico}
+                                        value={formData?.dico ?? ''}
                                         onChange={(e) => handleInputChange("dico", e.target.value)}
                                         placeholder="Enter DICO"
                                     />
@@ -211,7 +223,7 @@ export function CreateCustomerModal({isOpen, onClose, onSubmit}: CreateCustomerM
                             Cancel
                         </Button>
                         <Button type="submit" disabled={isSubmitting} className="bg-green-600 hover:bg-green-700">
-                            {isSubmitting ? "Creating..." : "Create Customer"}
+                            {isSubmitting ? editCustomerData ? "Updating..." : "Creating..." : editCustomerData ? "Update Customer" : "Create Customer"}
                         </Button>
                     </div>
                 </form>
