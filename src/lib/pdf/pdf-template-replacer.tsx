@@ -7,7 +7,7 @@ export interface TemplateReplacements {
 }
 
 export class PDFTemplateReplacer {
-    static async generateFromTemplate(order: any): Promise<Uint8Array> {
+    static async generateFromTemplate(order: any): Promise<BlobPart> {
         try {
             // Try to load template first
             let templateBytes: Uint8Array
@@ -97,7 +97,7 @@ export class PDFTemplateReplacer {
                 })
             })
 
-            return await pdfDoc.save()
+            return await pdfDoc.save() as BlobPart
         } catch (error) {
             console.error("Error processing template:", error)
             // Fallback to creating new PDF
@@ -105,7 +105,7 @@ export class PDFTemplateReplacer {
         }
     }
 
-    private static async createNewInvoicePDF(order: any): Promise<Uint8Array> {
+    private static async createNewInvoicePDF(order: any): Promise<BlobPart> {
         const pdfDoc = await PDFDocument.create()
         const page = pdfDoc.addPage([595, 842])
         const {width, height} = page.getSize()
@@ -228,6 +228,6 @@ export class PDFTemplateReplacer {
             color: rgb(0.5, 0.5, 0.5),
         })
 
-        return await pdfDoc.save()
+        return await pdfDoc.save() as BlobPart
     }
 }

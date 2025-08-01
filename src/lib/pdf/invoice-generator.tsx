@@ -588,7 +588,7 @@ export default function InvoiceGenerator() {
             })
 
             // Uložení PDF
-            const pdfBytes = await pdfDoc.save()
+            const pdfBytes = await pdfDoc.save() as BlobPart
 
             // Stažení PDF
             const blob = new Blob([pdfBytes], {type: "application/pdf"})

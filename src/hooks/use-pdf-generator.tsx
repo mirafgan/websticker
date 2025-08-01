@@ -42,7 +42,7 @@ export function usePDFGenerator() {
         try {
             setIsGenerating(true)
 
-            const pdfBytes = await PDFTemplateReplacer.generateFromTemplate(order)
+            const pdfBytes:BlobPart = await PDFTemplateReplacer.generateFromTemplate(order)
             const filename = `invoice-template-${order.id}-${Date.now()}.pdf`
 
             PDFGenerator.downloadPDF(pdfBytes, filename)

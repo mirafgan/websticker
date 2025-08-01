@@ -272,7 +272,7 @@ export class PDFGenerator {
         }
     }
 
-    static downloadPDF(pdfBytes: Uint8Array, filename: string) {
+    static downloadPDF(pdfBytes: BlobPart, filename: string) {
         try {
             const blob = new Blob([pdfBytes], {type: "application/pdf"})
             const url = URL.createObjectURL(blob)
