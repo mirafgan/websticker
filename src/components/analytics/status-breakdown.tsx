@@ -17,9 +17,9 @@ export function StatusBreakdown({statusCounts, totalOrders}: StatusBreakdownProp
             <CardContent>
                 <div className="space-y-4">
                     <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div className="flex items-center gap-3">
-                            <FileText className="h-5 w-5 text-gray-600"/>
-                            <span className="font-medium">Drafts</span>
+                        <div className="flex items-center gap-3 text-gray-600">
+                            <FileText className="h-5 w-5 "/>
+                            <span className="font-medium ">Drafts</span>
                         </div>
                         <div className="flex items-center gap-2">
                             <Badge variant="secondary">{statusCounts.Drafts}</Badge>
@@ -30,8 +30,8 @@ export function StatusBreakdown({statusCounts, totalOrders}: StatusBreakdownProp
                     </div>
 
                     <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
-                        <div className="flex items-center gap-3">
-                            <Clock className="h-5 w-5 text-yellow-600"/>
+                        <div className="flex items-center gap-3 text-yellow-600">
+                            <Clock className="h-5 w-5 "/>
                             <span className="font-medium">Pending</span>
                         </div>
                         <div className="flex items-center gap-2">
@@ -43,8 +43,8 @@ export function StatusBreakdown({statusCounts, totalOrders}: StatusBreakdownProp
                     </div>
 
                     <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                        <div className="flex items-center gap-3">
-                            <CheckCircle className="h-5 w-5 text-green-600"/>
+                        <div className="flex items-center gap-3 text-green-600">
+                            <CheckCircle className="h-5 w-5 "/>
                             <span className="font-medium">Paid</span>
                         </div>
                         <div className="flex items-center gap-2">
