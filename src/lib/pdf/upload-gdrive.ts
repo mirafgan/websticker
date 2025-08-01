@@ -17,6 +17,10 @@ const SCOPES = 'https://www.googleapis.com/auth/drive.file';
 // }
 
 export function initClient(pdfBytes: BlobPart) {
+    function handleCredentialResponse({credential}: { credential: string }) {
+        uploadFileToDrive(pdfBytes, credential)
+    }
+
     if (typeof window !== undefined) {
         window?.google?.accounts.id.initialize({
 
@@ -28,27 +32,24 @@ export function initClient(pdfBytes: BlobPart) {
 
 }
 
-function handleCredentialResponse(...rest: any[]) {
-    console.log(rest)
-}
 
-// function uploadFileToDrive(pdfBytes: BlobPart) {
-//     console.log(pdfBytes)
-//     const blob = new Blob([pdfBytes], {type: 'application/pdf'});
-//     const metadata = {
-//         name: 'test.pdf',
-//         mimeType: 'application/pdf',
-//     };
-//
-//     const accessToken = gapi.auth.getToken().access_token;
-//     const form = new FormData();
-//     form.append('metadata', new Blob([JSON.stringify(metadata)], {type: 'application/json'}));
-//     form.append('file', blob);
-//
-//     fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', {
-//         method: 'POST',
-//         headers: new Headers({Authorization: 'Bearer ' + accessToken}),
-//         body: form,
-//     }).then(res => res.json())
-//         .then(val => console.log('Uploaded file ID:', val.id));
-// }
+function uploadFileToDrive(pdfBytes: BlobPart, credential: string) {
+    const blob = new Blob([pdfBytes], {type: 'application/pdf'});
+    const metadata = {
+        name: 'test.pdf',
+        mimeType: 'application/pdf',
+    };
+
+    // const accessToken = gapi.auth.getToken().access_token;
+    const form = new FormData();
+    form.append('metadata', new Blob([JSON.stringify(metadata)], {type: 'application/json'}));
+    form.append('file', blob);
+
+    fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', {
+        method: 'POST',
+        headers: new Headers({Authorization: 'Bearer ' + credential}),
+        body: form,
+    }).then(res => res.json())
+        .then(val => console.log('Uploaded file ID:', val.id))
+        .catch(err => console.log(err));
+}
