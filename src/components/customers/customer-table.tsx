@@ -3,7 +3,7 @@
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table"
 import {countries} from "@/lib/countries"
 import {Button} from "@/components/ui/button";
-import {Edit, Trash2} from "lucide-react";
+import {Edit2, Trash2} from "lucide-react";
 import {api} from "@/trpc/react";
 import useConfirmationModalStore from "@/store/confirmation-modal-store";
 import type {Customer} from "@/generated/prisma/client";
@@ -175,6 +175,15 @@ export default function CustomerTable({customers, onEdit}: CustomerTableProps) {
                                 <TableCell>
                                     <div className="flex items-center gap-2">
                                         <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="h-8 w-8 p-0 bg-transparent"
+                                            title="Edit Customer"
+                                            onClick={() => onEdit?.(customer)}
+                                        >
+                                            <Edit2 className="h-4 w-4"/>
+                                        </Button>
+                                        <Button
                                             variant="destructive"
                                             size="sm"
                                             className="h-8 w-8 p-0"
@@ -182,15 +191,6 @@ export default function CustomerTable({customers, onEdit}: CustomerTableProps) {
                                             onClick={() => handleDelete(customer.id)}
                                         >
                                             <Trash2 className="h-4 w-4"/>
-                                        </Button>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            className="h-8 w-8 p-0 bg-transparent"
-                                            title="Edit Customer"
-                                            onClick={() => onEdit?.(customer)}
-                                        >
-                                            <Edit className="h-4 w-4"/>
                                         </Button>
                                     </div>
                                 </TableCell>

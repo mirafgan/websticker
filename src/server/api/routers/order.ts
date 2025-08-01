@@ -60,6 +60,30 @@ export const orderRouter = createTRPCRouter({
             return ({message: "Not Found", status: 404, data: []})
         }
     }),
+    getOrdersByDate: publicProcedure
+        .input(z.object({from: z.date(), to: z.date()}))
+        .query(async ({input, ctx}) => {
+            try {
+                const orders = await ctx.db.order.findMany({
+                    where: {createdAt: {gte: input.from, lte: input.to}},
+                    include: {
+                        contact: {
+                            select: {name: true, surname: true}
+                        },
+                        status: {
+                            select: {
+                                name: true,
+                            },
+                        },
+                    },
+
+                });
+                return {message: "Orders found", data: orders}
+
+            } catch (e) {
+                return ({message: "Something went wrong"})
+            }
+        }),
     getAllOrders: publicProcedure
         .query(async ({ctx}) => {
             try {
