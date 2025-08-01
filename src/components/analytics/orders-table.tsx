@@ -80,7 +80,7 @@ export function OrdersTable({filteredOrders}: OrdersTableProps) {
                                         </span>
                                     </Badge>
                                 </TableCell>
-                                <TableCell className="text-right font-medium">₺{order.total.toFixed(2)}</TableCell>
+                                <TableCell className="text-right font-medium">${order.total.toFixed(2)}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>

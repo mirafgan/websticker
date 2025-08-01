@@ -27,7 +27,7 @@ export function MetricsCards({totalOrders, totalRevenue, paidRevenue}: MetricsCa
                     <DollarSign className="h-4 w-4 text-muted-foreground"/>
                 </CardHeader>
                 <CardContent>
-                    <div className="text-2xl font-bold">₺{totalRevenue.toFixed(2)}</div>
+                    <div className="text-2xl font-bold">${totalRevenue.toFixed(2)}</div>
                     <p className="text-xs text-muted-foreground">All orders included</p>
                 </CardContent>
             </Card>
@@ -38,7 +38,7 @@ export function MetricsCards({totalOrders, totalRevenue, paidRevenue}: MetricsCa
                     <TrendingUp className="h-4 w-4 text-muted-foreground"/>
                 </CardHeader>
                 <CardContent>
-                    <div className="text-2xl font-bold text-green-600">₺{paidRevenue.toFixed(2)}</div>
+                    <div className="text-2xl font-bold text-green-600">${paidRevenue.toFixed(2)}</div>
                     <p className="text-xs text-muted-foreground">Paid orders only</p>
                 </CardContent>
             </Card>
@@ -50,7 +50,7 @@ export function MetricsCards({totalOrders, totalRevenue, paidRevenue}: MetricsCa
                 </CardHeader>
                 <CardContent>
                     <div className="text-2xl font-bold">
-                        ₺{totalOrders > 0 ? (totalRevenue / totalOrders).toFixed(2) : "0.00"}
+                        ${totalOrders > 0 ? (totalRevenue / totalOrders).toFixed(2) : "0.00"}
                     </div>
                     <p className="text-xs text-muted-foreground">Average per order</p>
                 </CardContent>

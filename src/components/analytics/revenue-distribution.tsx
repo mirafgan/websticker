@@ -25,23 +25,23 @@ export function RevenueDistribution({filteredOrders, paidRevenue, totalRevenue}:
                 <div className="space-y-4">
                     <div className="flex justify-between items-center">
                         <span className="text-sm font-medium">Paid Orders</span>
-                        <span className="text-lg font-bold text-green-600">₺{paidRevenue.toFixed(2)}</span>
+                        <span className="text-lg font-bold text-green-600">${paidRevenue.toFixed(2)}</span>
                     </div>
 
                     <div className="flex justify-between items-center">
                         <span className="text-sm font-medium">Pending Orders</span>
-                        <span className="text-lg font-bold text-yellow-600">₺{pendingRevenue.toFixed(2)}</span>
+                        <span className="text-lg font-bold text-yellow-600">${pendingRevenue.toFixed(2)}</span>
                     </div>
 
                     <div className="flex justify-between items-center">
                         <span className="text-sm font-medium">Draft Orders</span>
-                        <span className="text-lg font-bold text-gray-600">₺{draftRevenue.toFixed(2)}</span>
+                        <span className="text-lg font-bold text-gray-600">${draftRevenue.toFixed(2)}</span>
                     </div>
 
                     <div className="pt-4 border-t">
                         <div className="flex justify-between items-center">
                             <span className="text-base font-semibold">Total Potential</span>
-                            <span className="text-xl font-bold">₺{totalRevenue.toFixed(2)}</span>
+                            <span className="text-xl font-bold">${totalRevenue.toFixed(2)}</span>
                         </div>
                     </div>
                 </div>
