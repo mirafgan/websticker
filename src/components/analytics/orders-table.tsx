@@ -3,7 +3,7 @@ import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card"
 import {Badge} from "@/components/ui/badge"
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table"
 import {format} from "date-fns"
-import {tr} from "date-fns/locale"
+import {enUS} from "date-fns/locale"
 import {Status} from "@/generated/prisma/enums"
 
 interface OrdersTableProps {
@@ -71,7 +71,7 @@ export function OrdersTable({filteredOrders}: OrdersTableProps) {
                             <TableRow key={order.id}>
                                 <TableCell className="font-medium">{order.id}</TableCell>
                                 <TableCell>{order.contact.name} {order.contact.surname}</TableCell>
-                                <TableCell>{format(new Date(order.createdAt), "dd MMM yyyy", {locale: tr})}</TableCell>
+                                <TableCell>{format(new Date(order.createdAt), "dd MMM yyyy", {locale: enUS})}</TableCell>
                                 <TableCell>
                                     <Badge className={getStatusColor(order.status.name)}>
                                         <span className="flex items-center gap-1">

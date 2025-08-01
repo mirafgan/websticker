@@ -78,7 +78,7 @@ export class PDFTemplateReplacer {
                 {text: order.contact.email, x: 100, y: height - 220, size: 12, font: font},
                 {text: `Order #${order.id}`, x: 100, y: height - 250, size: 12, font: boldFont},
                 {
-                    text: new Date(order.createdAt).toLocaleDateString("tr-TR"),
+                    text: new Date(order.createdAt).toLocaleDateString("en-US"),
                     x: 100,
                     y: height - 270,
                     size: 12,

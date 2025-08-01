@@ -5,7 +5,7 @@ import {Button} from "@/components/ui/button"
 import {Calendar} from "@/components/ui/calendar"
 import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover"
 import {format} from "date-fns"
-import {tr} from "date-fns/locale"
+import {enUS} from "date-fns/locale"
 import type {DateRange} from "./types"
 
 interface AnalyticsHeaderProps {
@@ -27,7 +27,7 @@ export function AnalyticsHeader({dateRange, setDateRange}: AnalyticsHeaderProps)
                         <Button variant="outline"
                                 className="w-[140px] justify-start text-left font-normal bg-transparent">
                             <CalendarIcon className="mr-2 h-4 w-4"/>
-                            {format(dateRange.from, "dd MMM", {locale: tr})}
+                            {format(dateRange.from, "dd MMM", {locale: enUS})}
                         </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
@@ -47,7 +47,7 @@ export function AnalyticsHeader({dateRange, setDateRange}: AnalyticsHeaderProps)
                         <Button variant="outline"
                                 className="w-[140px] justify-start text-left font-normal bg-transparent">
                             <CalendarIcon className="mr-2 h-4 w-4"/>
-                            {format(dateRange.to, "dd MMM", {locale: tr})}
+                            {format(dateRange.to, "dd MMM", {locale: enUS})}
                         </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
