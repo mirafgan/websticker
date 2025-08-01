@@ -17,7 +17,7 @@ const currentDay = d.getDate()
 
 export default function OrdersAnalytics() {
     const [dateRange, setDateRange] = useState<DateRange>({
-        from: new Date(currentYear, 0, 0),
+        from: new Date(currentYear, 0, 1),
         to: new Date(currentYear, currentMonth, currentDay),
     })
 
