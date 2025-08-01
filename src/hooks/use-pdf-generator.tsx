@@ -4,6 +4,7 @@ import {useState} from "react"
 import {type InvoiceData, PDFGenerator} from "@/lib/pdf/pdf-generator"
 import {PDFTemplateReplacer} from "@/lib/pdf/pdf-template-replacer"
 import type {Order} from "@/lib/types"
+import {generatePDF} from "@/components/TestGenerator";
 
 export function usePDFGenerator() {
     const [isGenerating, setIsGenerating] = useState(false)
@@ -26,9 +27,9 @@ export function usePDFGenerator() {
                 items: order.products
             }
             console.log(invoiceData)
-            // const pdfBytes = await PDFGenerator.generateInvoice(invoiceData)
+            const pdfBytes = await generatePDF()
             // const filename = `invoice-${order.id}-${Date.now()}.pdf`
-            //
+
             // PDFGenerator.downloadPDF(pdfBytes, filename)
         } catch (error) {
             console.error("Failed to generate PDF:", error)
@@ -42,7 +43,7 @@ export function usePDFGenerator() {
         try {
             setIsGenerating(true)
 
-            const pdfBytes:BlobPart = await PDFTemplateReplacer.generateFromTemplate(order)
+            const pdfBytes: BlobPart = await PDFTemplateReplacer.generateFromTemplate(order)
             const filename = `invoice-template-${order.id}-${Date.now()}.pdf`
 
             PDFGenerator.downloadPDF(pdfBytes, filename)

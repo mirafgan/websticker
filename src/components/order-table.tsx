@@ -68,10 +68,11 @@ export default function OrderTable({
 
     async function handleGeneratePDF(order: Order) {
         try {
-            await generateFromTemplate(order)
+            // await generateFromTemplate(order)
+            await generateInvoice(order)
+
         } catch (e) {
             console.log("generateFromTemplate", e)
-
             try {
                 await generateInvoice(order)
             } catch (e) {
@@ -220,17 +221,6 @@ export default function OrderTable({
                                         >
                                             <Trash2 className="h-4 w-4"/>
                                         </Button>
-                                        {/*<Button*/}
-                                        {/*    variant="outline"*/}
-                                        {/*    size="sm"*/}
-                                        {/*    className="h-8 w-8 p-0 bg-transparent"*/}
-                                        {/*    title="View Details"*/}
-                                        {/*    onClick={() => {*/}
-                                        {/*        console.log("View order details:", order.id)*/}
-                                        {/*    }}*/}
-                                        {/*>*/}
-                                        {/*    <Eye className="h-4 w-4"/>*/}
-                                        {/*</Button>*/}
                                     </div>
                                 </TableCell>
                             </TableRow>
