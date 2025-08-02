@@ -25,22 +25,35 @@ export default function ConfirmationModal() {
                     <DialogDescription>{content}</DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
-                    <Button type="button" variant="outline" onClick={closeModal}>
-                        Cancel
-                    </Button>
-                    <Button type="button" className="bg-green-600 hover:bg-green-700"
-                            disabled={isLoading}
-                            onClick={async () => {
-                                setIsLoading(true)
-                                await onSubmit();
-                                setTimeout(() => {
-                                    closeModal();
-                                    setIsLoading(false)
-                                }, 500);
-                            }}
-                    >
-                        {isLoading ? "Processing..." : "Confirm"}
-                    </Button>
+
+                    {
+                        onSubmit ? <>
+                                <Button type="button" variant="outline" onClick={closeModal}>
+                                    Cancel
+                                </Button>
+                                <Button type="button" className="bg-green-600 hover:bg-green-700"
+                                        disabled={isLoading}
+                                        onClick={async () => {
+                                            setIsLoading(true)
+                                            await onSubmit();
+                                            setTimeout(() => {
+                                                closeModal();
+                                                setIsLoading(false)
+                                            }, 500);
+                                        }}
+                                >
+                                    {isLoading ? "Processing..." : "Confirm"}
+                                </Button>
+                            </>
+                            :
+                            <Button type="button" className="bg-green-600 hover:bg-green-700"
+                                    disabled={isLoading}
+                                    onClick={closeModal}
+                            >
+                                Close
+                            </Button>
+                    }
+
                 </DialogFooter>
 
             </DialogContent>

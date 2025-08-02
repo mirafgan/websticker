@@ -1,647 +1,635 @@
 "use client"
 
-import {useState} from "react"
-import {Button} from "@/components/ui/button"
-import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card"
-import {Download, FileText} from "lucide-react"
 import {PDFDocument, rgb} from "pdf-lib"
-import fontkit from '@pdf-lib/fontkit'
+import fontkit from "@pdf-lib/fontkit";
+import type {Order} from "@/lib/types";
 
-export default function InvoiceGenerator() {
-    const [isGenerating, setIsGenerating] = useState(false)
+import {createQrPaymentSvg} from '@tedyno/cz-qr-payment';
 
-    const generatePDF = async () => {
-        setIsGenerating(true)
+const account = '285496379/0300';
 
+const convertToPng = async (svg: string): Promise<string> => {
+    return await new Promise((resolve, reject) => {
+        const svgBlob = new Blob([svg], {type: 'image/svg+xml'})
+        const url = URL.createObjectURL(svgBlob)
+        const img = new Image();
+        let pngDataUrl
+        img.onload = async () => {
+            const canvas = document.createElement('canvas')
+            canvas.width = img.width
+            canvas.height = img.height
+            const ctx = canvas.getContext('2d')
+            ctx?.drawImage(img, 0, 0)
+            pngDataUrl = canvas.toDataURL('image/png');
+            resolve(pngDataUrl)
+        };
+        img.src = url
+    })
+};
+
+
+export const generatePDF = async (order: Order) => {
+        const amount = 100
+        const options = {
+            VS: '0861201',
+            CC: 'CZK',
+            message: `Payment for test order #${order.id}`,
+        };
         try {
-            // Vytvoření nového PDF dokumentu
-
+            // Create a new PDF document
             const pdfDoc = await PDFDocument.create()
-            const page = pdfDoc.addPage([595.28, 841.89]) // A4 rozměry
+            const page = pdfDoc.addPage([595, 842]) // A4 size
+            const svg = createQrPaymentSvg(amount, account, options);
+
+            // Load fonts
             pdfDoc.registerFontkit(fontkit)
-
-            // Načtení fontů - použijeme font s podporou UTF-8
-            const fontUrl =
-                "https://fonts.gstatic.com/s/notosans/v36/o-0IIpQlx3QUlC5A4PNb4j5Ba_2c7A.ttf"
-            const fontBytes = await fetch(fontUrl).then((res) => res.arrayBuffer())
-            const font = await pdfDoc.embedFont(fontBytes)
-
-            const boldFontUrl =
-                'https://fonts.gstatic.com/s/notosans/v40/o-0IIpQlx3QUlC5A4PNb4j5Ba_2c7A.ttf'
-            const boldFontBytes = await fetch(boldFontUrl).then((res) => res.arrayBuffer())
-            const boldFont = await pdfDoc.embedFont(boldFontBytes)
-
+            // Load fonts
+            const loadRegularFont = await fetch("/fonts/NotoSansRegular.ttf").then((res) => res.arrayBuffer())
+            const loadBoldFont = await fetch("/fonts/NotoSansBold.ttf").then((res) => res.arrayBuffer())
+            const font = await pdfDoc.embedFont(loadRegularFont)
+            const boldFont = await pdfDoc.embedFont(loadBoldFont)
+            const logoImageBytes = await fetch("/logo/company-logo.jpg").then((res) => res.arrayBuffer())
             const {width, height} = page.getSize()
+            const pngDataUrl = await convertToPng(svg)
 
-            // Hlavička
-            page.drawText("Proforma faktura0861201", {
-                x: 50,
-                y: height - 50,
-                size: 18,
-                font: boldFont,
-                color: rgb(0, 0, 0),
+            const pngQrCode = await pdfDoc.embedPng(pngDataUrl);
+            const dimQr = pngQrCode.scale(0.8)
+            // Colors
+            const black = rgb(0, 0, 0)
+            const gray = rgb(0.5, 0.5, 0.5)
+            const lightGray = rgb(0.8, 0.8, 0.8)
+
+            let yPosition = height - 60
+
+            // ShipEx Logo (top right)
+            const jpgImage = await pdfDoc.embedJpg(logoImageBytes)
+            const jpgDims = jpgImage.scale(0.15)
+            page.drawImage(jpgImage, {
+                x: width - 120,
+                y: yPosition - 20,
+                // size: 24,
+                width: jpgDims.width,
+                height: jpgDims.height,
+                // font: boldFont,
+                // color: rgb(0.2, 0.2, 0.6), // Blue color for ShipEx
             })
 
-            // Dodavatel sekce
-            let yPosition = height - 100
+            // Header section
+            yPosition = height - 100
+
+            // Proforma faktura (left) and invoice number (right)
+            page.drawText("Proforma faktura", {
+                x: 50,
+                y: yPosition,
+                size: 18,
+                font: boldFont,
+                color: black,
+            })
+
+            page.drawText("0861201", {
+                x: width - 120,
+                y: yPosition,
+                size: 18,
+                font: boldFont,
+                color: black,
+            })
+
+            // Horizontal line under header
+            yPosition -= 20
+            page.drawLine({
+                start: {x: 50, y: yPosition},
+                end: {x: width - 50, y: yPosition},
+                thickness: 1,
+                color: black,
+            })
+
+            yPosition -= 30
+
+            // Supplier section (Dodavatel) - Left column
             page.drawText("Dodavatel:", {
+                x: 50,
+                y: yPosition,
+                size: 11,
+                font: font,
+                color: gray,
+            })
+
+            // Customer section (Zákazník) - Right column
+            page.drawText("Zákazník:", {
+                x: 320,
+                y: yPosition,
+                size: 11,
+                font: font,
+                color: gray,
+            })
+
+            yPosition -= 25
+
+            // Supplier details
+            page.drawText("ShipEx Logistic s.r.o.", {
                 x: 50,
                 y: yPosition,
                 size: 12,
                 font: boldFont,
-                color: rgb(0, 0, 0),
+                color: black,
+            })
+
+            // Customer details
+            page.drawText("MINUTE VISION s.r.o.", {
+                x: 320,
+                y: yPosition,
+                size: 12,
+                font: boldFont,
+                color: black,
             })
 
             yPosition -= 20
-            page.drawText("ShipEx Logistic s.r.o.", {
-                x: 50,
-                y: yPosition,
-                size: 11,
-                font: boldFont,
-                color: rgb(0, 0, 0),
-            })
 
-            yPosition -= 15
+            // Supplier address
             page.drawText("Zelný trh 293/10", {
                 x: 50,
                 y: yPosition,
                 size: 10,
                 font: font,
-                color: rgb(0, 0, 0),
+                color: black,
             })
 
-            yPosition -= 15
-            page.drawText("60200, Brno", {
-                x: 50,
-                y: yPosition,
-                size: 10,
-                font: font,
-                color: rgb(0, 0, 0),
-            })
-
-            yPosition -= 15
-            page.drawText("Česká republika", {
-                x: 50,
-                y: yPosition,
-                size: 10,
-                font: font,
-                color: rgb(0, 0, 0),
-            })
-
-            yPosition -= 15
-            page.drawText("IČO: 07491310   DIČ: CZ07491310", {
-                x: 50,
-                y: yPosition,
-                size: 10,
-                font: font,
-                color: rgb(0, 0, 0),
-            })
-
-            yPosition -= 15
-            page.drawText("C 108436 vedená u Krajského soudu v Brně", {
-                x: 50,
-                y: yPosition,
-                size: 10,
-                font: font,
-                color: rgb(0, 0, 0),
-            })
-
-            // Zákazník sekce
-            yPosition = height - 100
-            page.drawText("Zákazník:", {
-                x: 320,
-                y: yPosition,
-                size: 12,
-                font: boldFont,
-                color: rgb(0, 0, 0),
-            })
-
-            yPosition -= 20
-            page.drawText("MINUTE VISION s.r.o.", {
-                x: 320,
-                y: yPosition,
-                size: 11,
-                font: boldFont,
-                color: rgb(0, 0, 0),
-            })
-
-            yPosition -= 15
+            // Customer address
             page.drawText("Na Folimance 2155/15", {
                 x: 320,
                 y: yPosition,
                 size: 10,
                 font: font,
-                color: rgb(0, 0, 0),
+                color: black,
             })
 
             yPosition -= 15
+
+            page.drawText("60200, Brno", {
+                x: 50,
+                y: yPosition,
+                size: 10,
+                font: font,
+                color: black,
+            })
+
             page.drawText("12000, Praha 2", {
                 x: 320,
                 y: yPosition,
                 size: 10,
                 font: font,
-                color: rgb(0, 0, 0),
+                color: black,
             })
 
             yPosition -= 15
+
+            page.drawText("Česká republika", {
+                x: 50,
+                y: yPosition,
+                size: 10,
+                font: font,
+                color: black,
+            })
+
             page.drawText("Česká republika", {
                 x: 320,
                 y: yPosition,
                 size: 10,
                 font: font,
-                color: rgb(0, 0, 0),
+                color: black,
             })
 
-            yPosition -= 15
+            yPosition -= 25
+
+            // Supplier tax details
+            page.drawText("IČO: 07491310  DIČ: CZ07491310", {
+                x: 50,
+                y: yPosition,
+                size: 10,
+                font: font,
+                color: black,
+            })
+
+            // Customer tax details
             page.drawText("IČO: 17833175", {
                 x: 320,
                 y: yPosition,
                 size: 10,
                 font: font,
-                color: rgb(0, 0, 0),
+                color: black,
             })
 
             yPosition -= 15
+
+            page.drawText("C 108436 vedená u Krajského soudu v Brně", {
+                x: 50,
+                y: yPosition,
+                size: 10,
+                font: font,
+                color: black,
+            })
+
             page.drawText("DIČ: CZ17833175", {
                 x: 320,
                 y: yPosition,
                 size: 10,
                 font: font,
-                color: rgb(0, 0, 0),
+                color: black,
             })
 
-            // Bankovní spojení a platební údaje
-            yPosition = height - 280
+            // Horizontal line
+            yPosition -= 30
+            page.drawLine({
+                start: {x: 50, y: yPosition},
+                end: {x: width - 50, y: yPosition},
+                thickness: 1,
+                color: black,
+            })
+
+            yPosition -= 30
+
+            // Banking information (left) and dates (right)
             page.drawText("Bankovní spojení:", {
                 x: 50,
                 y: yPosition,
                 size: 11,
                 font: boldFont,
-                color: rgb(0, 0, 0),
+                color: black,
             })
 
-            yPosition -= 15
+            page.drawText("Datum vystavení: 21.07.2025", {
+                x: 320,
+                y: yPosition,
+                size: 10,
+                font: boldFont,
+                color: black,
+            })
+
+            yPosition -= 18
+
             page.drawText("285496379 / 0300 (ČSOB)", {
                 x: 50,
                 y: yPosition,
                 size: 10,
                 font: font,
-                color: rgb(0, 0, 0),
+                color: black,
+            })
+
+            page.drawText("Datum zdanitelného plnění: -", {
+                x: 320,
+                y: yPosition,
+                size: 10,
+                font: boldFont,
+                color: black,
             })
 
             yPosition -= 15
+
             page.drawText("7769530002 / 5500 (Raiffeisen bank)", {
                 x: 50,
                 y: yPosition,
                 size: 10,
                 font: font,
-                color: rgb(0, 0, 0),
+                color: black,
             })
 
-            yPosition -= 20
+            page.drawText("Datum splatnosti: 28.07.2025", {
+                x: 320,
+                y: yPosition,
+                size: 10,
+                font: boldFont,
+                color: black,
+            })
+
+            yPosition -= 18
+
             page.drawText("Variabilní symbol: 0861201", {
                 x: 50,
                 y: yPosition,
                 size: 10,
-                font: font,
-                color: rgb(0, 0, 0),
+                font: boldFont,
+                color: black,
             })
 
             yPosition -= 15
+
             page.drawText("Typ platby: -", {
                 x: 50,
                 y: yPosition,
                 size: 10,
-                font: font,
-                color: rgb(0, 0, 0),
+                font: boldFont,
+                color: black,
             })
 
             yPosition -= 15
+
             page.drawText("Pro správné přiřazení platby uvádějte správný variabilní symbol", {
                 x: 50,
                 y: yPosition,
                 size: 9,
                 font: font,
-                color: rgb(0, 0, 0),
+                color: gray,
             })
 
-            // Datumy
-            yPosition = height - 280
-            page.drawText("Datum vystavení: 21.07.2025", {
-                x: 320,
-                y: yPosition,
-                size: 10,
-                font: font,
-                color: rgb(0, 0, 0),
-            })
-
-            yPosition -= 15
-            page.drawText("Datum zdanitelného plnění: -", {
-                x: 320,
-                y: yPosition,
-                size: 10,
-                font: font,
-                color: rgb(0, 0, 0),
-            })
-
-            yPosition -= 15
-            page.drawText("Datum splatnosti: 28.07.2025", {
-                x: 320,
-                y: yPosition,
-                size: 10,
-                font: font,
-                color: rgb(0, 0, 0),
-            })
-
-            // Tabulka hlavička
-            yPosition = height - 420
-
-            // Kreslení čar pro tabulku
+            // Horizontal line before table
+            yPosition -= 25
             page.drawLine({
-                start: {x: 50, y: yPosition + 5},
-                end: {x: 545, y: yPosition + 5},
+                start: {x: 50, y: yPosition},
+                end: {x: width - 50, y: yPosition},
                 thickness: 1,
-                color: rgb(0, 0, 0),
+                color: black,
             })
 
+            yPosition -= 25
+
+            // Items table
+            const tableStartY = yPosition
+            const tableHeight = 100
+            const tableWidth = width - 100
+
+            // Draw table border
+            page.drawRectangle({
+                x: 50,
+                y: tableStartY - tableHeight,
+                width: tableWidth,
+                height: tableHeight,
+                borderColor: black,
+                borderWidth: 1,
+            })
+
+            // Table header background (light gray)
+            page.drawRectangle({
+                x: 50,
+                y: tableStartY - 25,
+                width: tableWidth,
+                height: 25,
+                color: rgb(0.95, 0.95, 0.95),
+                borderColor: black,
+                borderWidth: 1,
+            })
+
+            // Table headers
             page.drawText("Popis položky", {
                 x: 55,
-                y: yPosition - 10,
+                y: tableStartY - 18,
                 size: 10,
                 font: boldFont,
-                color: rgb(0, 0, 0),
+                color: black,
             })
 
             page.drawText("Množství", {
-                x: 200,
-                y: yPosition - 10,
+                x: 220,
+                y: tableStartY - 18,
                 size: 10,
                 font: boldFont,
-                color: rgb(0, 0, 0),
+                color: black,
             })
 
             page.drawText("Jedn. cena bez DPH", {
-                x: 260,
-                y: yPosition - 10,
+                x: 280,
+                y: tableStartY - 18,
                 size: 10,
                 font: boldFont,
-                color: rgb(0, 0, 0),
+                color: black,
             })
 
             page.drawText("DPH", {
-                x: 370,
-                y: yPosition - 10,
+                x: 390,
+                y: tableStartY - 18,
                 size: 10,
                 font: boldFont,
-                color: rgb(0, 0, 0),
+                color: black,
             })
 
             page.drawText("Cena bez DPH", {
-                x: 400,
-                y: yPosition - 10,
+                x: 420,
+                y: tableStartY - 18,
                 size: 10,
                 font: boldFont,
-                color: rgb(0, 0, 0),
+                color: black,
             })
 
             page.drawText("Cena s DPH", {
-                x: 480,
-                y: yPosition - 10,
+                x: 500,
+                y: tableStartY - 18,
                 size: 10,
                 font: boldFont,
-                color: rgb(0, 0, 0),
+                color: black,
             })
 
-            yPosition -= 25
-            page.drawLine({
-                start: {x: 50, y: yPosition + 5},
-                end: {x: 545, y: yPosition + 5},
-                thickness: 1,
-                color: rgb(0, 0, 0),
+            // Vertical lines for table columns
+            const columnPositions = [215, 275, 385, 415, 495]
+            columnPositions.forEach((x) => {
+                page.drawLine({
+                    start: {x, y: tableStartY},
+                    end: {x, y: tableStartY - tableHeight},
+                    thickness: 1,
+                    color: black,
+                })
             })
 
-            // Položky tabulky
-            yPosition -= 15
+            // Table rows
+            let rowY = tableStartY - 40
+
+            // Row 1: Poštovné
             page.drawText("Poštovné (CZ - CZ)", {
                 x: 55,
-                y: yPosition,
-                size: 10,
+                y: rowY,
+                size: 9,
                 font: font,
-                color: rgb(0, 0, 0),
+                color: black,
             })
 
             page.drawText("1 ks", {
-                x: 200,
-                y: yPosition,
-                size: 10,
+                x: 230,
+                y: rowY,
+                size: 9,
                 font: font,
-                color: rgb(0, 0, 0),
+                color: black,
             })
 
             page.drawText("141.32 Kč", {
-                x: 260,
-                y: yPosition,
-                size: 10,
+                x: 290,
+                y: rowY,
+                size: 9,
                 font: font,
-                color: rgb(0, 0, 0),
+                color: black,
             })
 
             page.drawText("21%", {
-                x: 370,
-                y: yPosition,
-                size: 10,
+                x: 390,
+                y: rowY,
+                size: 9,
                 font: font,
-                color: rgb(0, 0, 0),
+                color: black,
             })
 
             page.drawText("141.32 Kč", {
-                x: 400,
-                y: yPosition,
-                size: 10,
+                x: 425,
+                y: rowY,
+                size: 9,
                 font: font,
-                color: rgb(0, 0, 0),
+                color: black,
             })
 
             page.drawText("171.00 Kč", {
-                x: 480,
-                y: yPosition,
-                size: 10,
+                x: 500,
+                y: rowY,
+                size: 9,
                 font: font,
-                color: rgb(0, 0, 0),
+                color: black,
             })
 
-            yPosition -= 15
+            // Horizontal line between rows
+            rowY -= 15
+            page.drawLine({
+                start: {x: 50, y: rowY},
+                end: {x: width - 50, y: rowY},
+                thickness: 1,
+                color: black,
+            })
+
+            rowY -= 10
+
+            // Row 2: Vyzvednutí zásilky
             page.drawText("Vyzvednutí zásilky", {
                 x: 55,
-                y: yPosition,
-                size: 10,
+                y: rowY,
+                size: 9,
                 font: font,
-                color: rgb(0, 0, 0),
+                color: black,
             })
 
             page.drawText("1 ks", {
-                x: 200,
-                y: yPosition,
-                size: 10,
+                x: 230,
+                y: rowY,
+                size: 9,
                 font: font,
-                color: rgb(0, 0, 0),
+                color: black,
             })
 
             page.drawText("32.23 Kč", {
-                x: 260,
-                y: yPosition,
-                size: 10,
+                x: 290,
+                y: rowY,
+                size: 9,
                 font: font,
-                color: rgb(0, 0, 0),
+                color: black,
             })
 
             page.drawText("21%", {
-                x: 370,
-                y: yPosition,
-                size: 10,
+                x: 390,
+                y: rowY,
+                size: 9,
                 font: font,
-                color: rgb(0, 0, 0),
+                color: black,
             })
 
             page.drawText("32.23 Kč", {
-                x: 400,
-                y: yPosition,
-                size: 10,
+                x: 425,
+                y: rowY,
+                size: 9,
                 font: font,
-                color: rgb(0, 0, 0),
+                color: black,
             })
 
             page.drawText("39.00 Kč", {
-                x: 480,
-                y: yPosition,
-                size: 10,
+                x: 500,
+                y: rowY,
+                size: 9,
                 font: font,
-                color: rgb(0, 0, 0),
+                color: black,
             })
 
-            yPosition -= 15
+            // Horizontal line between rows
+            rowY -= 15
+            page.drawLine({
+                start: {x: 50, y: rowY},
+                end: {x: width - 50, y: rowY},
+                thickness: 1,
+                color: black,
+            })
+
+            rowY -= 10
+
+            // Row 3: Zákaznická sleva
             page.drawText("Zákaznická sleva (5%)", {
                 x: 55,
-                y: yPosition,
-                size: 10,
+                y: rowY,
+                size: 9,
                 font: font,
-                color: rgb(0, 0, 0),
+                color: black,
             })
 
             page.drawText("1 ks", {
-                x: 200,
-                y: yPosition,
-                size: 10,
+                x: 230,
+                y: rowY,
+                size: 9,
                 font: font,
-                color: rgb(0, 0, 0),
+                color: black,
             })
 
             page.drawText("-7.44 Kč", {
-                x: 260,
-                y: yPosition,
-                size: 10,
+                x: 290,
+                y: rowY,
+                size: 9,
                 font: font,
-                color: rgb(0, 0, 0),
+                color: black,
             })
 
             page.drawText("21%", {
-                x: 370,
-                y: yPosition,
-                size: 10,
+                x: 390,
+                y: rowY,
+                size: 9,
                 font: font,
-                color: rgb(0, 0, 0),
+                color: black,
             })
 
             page.drawText("-7.44 Kč", {
-                x: 400,
-                y: yPosition,
-                size: 10,
+                x: 425,
+                y: rowY,
+                size: 9,
                 font: font,
-                color: rgb(0, 0, 0),
+                color: black,
             })
 
             page.drawText("-9.00 Kč", {
-                x: 480,
-                y: yPosition,
-                size: 10,
+                x: 500,
+                y: rowY,
+                size: 9,
                 font: font,
-                color: rgb(0, 0, 0),
+                color: black,
             })
 
-            yPosition -= 25
+            // VAT summary table
+            yPosition = rowY - 40
+
             page.drawLine({
-                start: {x: 50, y: yPosition + 5},
-                end: {x: 545, y: yPosition + 5},
+                start: {
+                    y: yPosition - 30,
+                    x: 0,
+                },
+                end: {
+                    y: yPosition - 30,
+                    x: 595,
+                },
                 thickness: 1,
-                color: rgb(0, 0, 0),
+                color: black,
+
+            });
+
+            page.drawImage(pngQrCode, {
+                x: 595 - dimQr.width - 30,
+                y: yPosition - 160,
+                width: dimQr.width,
+                height: dimQr.height,
             })
+            // Generate PDF
+            const pdfBytes = await pdfDoc.save() as BlobPart;
+            return pdfBytes
 
-            // Souhrn DPH
-            yPosition -= 20
-            page.drawText("Základ DPH", {
-                x: 350,
-                y: yPosition,
-                size: 10,
-                font: boldFont,
-                color: rgb(0, 0, 0),
-            })
-
-            page.drawText("DPH", {
-                x: 430,
-                y: yPosition,
-                size: 10,
-                font: boldFont,
-                color: rgb(0, 0, 0),
-            })
-
-            page.drawText("Spolu", {
-                x: 480,
-                y: yPosition,
-                size: 10,
-                font: boldFont,
-                color: rgb(0, 0, 0),
-            })
-
-            yPosition -= 15
-            page.drawText("Celkem s DPH 21%", {
-                x: 250,
-                y: yPosition,
-                size: 10,
-                font: font,
-                color: rgb(0, 0, 0),
-            })
-
-            page.drawText("166.11 Kč", {
-                x: 350,
-                y: yPosition,
-                size: 10,
-                font: font,
-                color: rgb(0, 0, 0),
-            })
-
-            page.drawText("34.89 Kč", {
-                x: 430,
-                y: yPosition,
-                size: 10,
-                font: font,
-                color: rgb(0, 0, 0),
-            })
-
-            page.drawText("201.00 Kč", {
-                x: 480,
-                y: yPosition,
-                size: 10,
-                font: font,
-                color: rgb(0, 0, 0),
-            })
-
-            // Celkem k úhradě
-            yPosition -= 30
-            page.drawText("Celkem k úhradě:", {
-                x: 350,
-                y: yPosition,
-                size: 12,
-                font: boldFont,
-                color: rgb(0, 0, 0),
-            })
-
-            yPosition -= 20
-            page.drawText("201.00 Kč", {
-                x: 450,
-                y: yPosition,
-                size: 14,
-                font: boldFont,
-                color: rgb(0, 0, 0),
-            })
-
-            // Tečkovaná čára
-            yPosition -= 30
-            let dotX = 50
-            while (dotX < 545) {
-                page.drawText(".", {
-                    x: dotX,
-                    y: yPosition,
-                    size: 10,
-                    font: font,
-                    color: rgb(0, 0, 0),
-                })
-                dotX += 10
-            }
-
-            // Patička
-            yPosition -= 30
-            page.drawText("Dodavatel", {
-                x: 50,
-                y: yPosition,
-                size: 11,
-                font: boldFont,
-                color: rgb(0, 0, 0),
-            })
-
-            yPosition -= 20
-            page.drawText("Email: info@shipex.cz   Telefon: +420 730 779 555   Web: www.shipex.cz", {
-                x: 50,
-                y: yPosition,
-                size: 10,
-                font: font,
-                color: rgb(0, 0, 0),
-            })
-
-            // Uložení PDF
-            const pdfBytes = await pdfDoc.save() as BlobPart
-
-            // Stažení PDF
-            const blob = new Blob([pdfBytes], {type: "application/pdf"})
-            const url = URL.createObjectURL(blob)
-            const link = document.createElement("a")
-            link.href = url
-            link.download = "proforma-faktura-0861201.pdf"
-            document.body.appendChild(link)
-            link.click()
-            document.body.removeChild(link)
-            URL.revokeObjectURL(url)
         } catch (error) {
-            console.error("Chyba při generování PDF:", error)
-        } finally {
-            setIsGenerating(false)
+            console.error("Error generating PDF:", error);
         }
     }
+;
 
-    return (
-        <div className="min-h-screen bg-gray-50 p-8">
-            <div className="max-w-2xl mx-auto">
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <FileText className="h-6 w-6"/>
-                            Generátor Proforma Faktury
-                        </CardTitle>
-                        <CardDescription>
-                            Vygeneruje a stáhne proforma fakturu č. 0861201 ve formátu PDF pomocí pdf-lib knihovny.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="bg-blue-50 p-4 rounded-lg">
-                            <h3 className="font-semibold text-blue-900 mb-2">Detaily faktury:</h3>
-                            <ul className="text-sm text-blue-800 space-y-1">
-                                <li>• Číslo faktury: 0861201</li>
-                                <li>• Dodavatel: ShipEx Logistic s.r.o.</li>
-                                <li>• Zákazník: MINUTE VISION s.r.o.</li>
-                                <li>• Celková částka: 201.00 Kč</li>
-                                <li>• Datum splatnosti: 28.07.2025</li>
-                            </ul>
-                        </div>
-
-                        <Button onClick={generatePDF} disabled={isGenerating} className="w-full" size="lg">
-                            <Download className="mr-2 h-4 w-4"/>
-                            {isGenerating ? "Generuji PDF..." : "Vygenerovat a stáhnout PDF"}
-                        </Button>
-
-                        <p className="text-sm text-gray-600 text-center">PDF bude automaticky staženo po
-                            vygenerování</p>
-                    </CardContent>
-                </Card>
-            </div>
-        </div>
-    )
-}

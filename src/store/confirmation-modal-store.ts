@@ -2,11 +2,11 @@ import {create} from "zustand/react";
 
 
 type IModalStoreActions = {
-    onSubmit: () => void,
+    onSubmit: null | (() => void),
 }
 
 type IModalStoreData = {
-    onSubmit: () => void,
+    onSubmit: null | (() => void),
     isOpen: boolean,
     title: string,
     content: string,
@@ -43,7 +43,8 @@ const useConfirmationModal = create<IModalStore>((set) => ({
         })
     },
     closeModal: () => {
-        set(initialStore)
+        set((prev) => ({...prev, isOpen: false}));
+        setTimeout(() => set(initialStore), 500)
     },
 }));
 

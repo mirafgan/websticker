@@ -9,6 +9,9 @@ import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger
 import {Button} from "@/components/ui/button";
 import {ChevronDown, Edit2, FileText, Trash2} from "lucide-react";
 import useConfirmationModalStore from "@/store/confirmation-modal-store";
+import UploadToDrive from "@/lib/pdf/upload-gdrive";
+import {generatePDF} from "@/lib/pdf/invoice-generator";
+
 
 interface IOrderTable {
     orders: Order[]
@@ -63,14 +66,18 @@ export default function OrderTable({
                                        handleDeleteOrder,
                                        handleEditOrder
                                    }: IOrderTable) {
-    const {isGenerating, generateInvoice, generateFromTemplate} = usePDFGenerator();
+    const {isGenerating, generateInvoice} = usePDFGenerator();
     const {openModal} = useConfirmationModalStore()
 
     async function handleGeneratePDF(order: Order) {
         try {
             // await generateFromTemplate(order)
-            await generateInvoice(order)
-
+            const pdfBytes = await generatePDF(order);
+            if (pdfBytes) {
+                const blob = new Blob([pdfBytes], {type: "application/pdf"});
+                const url = URL.createObjectURL(blob)
+                window.open(url, "_blank");
+            }
         } catch (e) {
             console.log("generateFromTemplate", e)
             try {
@@ -203,6 +210,7 @@ export default function OrderTable({
                                         >
                                             <FileText className="h-4 w-4"/>
                                         </Button>
+                                        <UploadToDrive order={order}/>
                                         <Button
                                             variant="outline"
                                             size="sm"
