@@ -85,7 +85,7 @@ export default function UploadToDrive({order}: { order: Order }) {
         onClick={() => handleGeneratePDF(order)}
         disabled={isGenerating}
         className="h-8 w-8 p-0"
-        title="Generate PDF"
+        title="Uploda GDrive"
     >
         <UploadCloud className="h-4 w-4"/>
     </Button>;
